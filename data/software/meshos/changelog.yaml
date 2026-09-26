@@ -1,7 +1,23 @@
 source: github
 repo: andymux/meshos-releases
-updatedAt: '2026-09-26T11:00:58.556Z'
+updatedAt: '2026-09-26T20:46:56.771Z'
 releases:
+  - version: v1.0.23
+    name: MeshOS v1.0.23
+    datetime: '2026-09-26T17:38:35Z'
+    url: https://github.com/andymux/meshos-releases/releases/tag/v1.0.23
+    prerelease: false
+    notes: >-
+      # MeshOS app 1.0.23
+
+
+      ## Repeaters over Bluetooth
+
+      - Fixes Manage a repeater showing only its tab bar, with no page underneath, on some phones
+      including Pixel phones on Android 17.
+
+      - If a repeater's page ever arrives damaged, the app now fetches it again by itself instead of
+      leaving a blank screen.
   - version: fw-v1.7.6
     name: MeshOS firmware v1.7.6
     datetime: '2026-09-26T10:54:11Z'
@@ -629,25 +645,3 @@ releases:
 
 
       APK SHA-256: `03b3d39041af723d39f1562348e8816c421253a9eb4ad840603ea7e49b6a7e76`
-  - version: fw-v1.6.4
-    name: MeshOS firmware v1.6.4
-    datetime: '2026-08-08T16:19:38Z'
-    url: https://github.com/andymux/meshos-releases/releases/tag/fw-v1.6.4
-    prerelease: false
-    notes: >-
-      Fixed touch not registering on the Delete and Clear confirm buttons at larger text sizes, new
-      Hide option for the MeshOS channel (works alongside Mute while per-channel internet keeps
-      running), clearer Internet Messaging description, and the internet globe icon now scales with
-      the chat text size.
-
-
-      Device firmware for LilyGo T-Deck and ThinkNode M9.
-
-      Install via SD card (firmware.bin) or the in-firmware updater.
-
-
-      SHA-256:
-
-      - TDeck: a5557389b81d3622966045cdcf1238a9acd8c207225dca05974509fe304710f7
-
-      - M9: 3aaaae2b30820e92d6f88d275c3f5b97f1fc6802af70e9cab28b59ffc6c077b9
