@@ -1,7 +1,141 @@
 source: github
 repo: liquidraver/ZephCore
-updatedAt: '2026-09-26T20:46:42.672Z'
+updatedAt: '2026-09-27T18:06:46.793Z'
 releases:
+  - version: 1.17.6-zephcore
+    name: Firmware 1.17.6-zephcore
+    datetime: '2026-09-27T15:16:50Z'
+    url: https://github.com/liquidraver/ZephCore/releases/tag/1.17.6-zephcore
+    prerelease: false
+    notes: >-
+      # ZephCore 1.17.6-zephcore
+
+
+      A large release: companion firmware now speaks WiFi (TCP, on boards that support it),
+      preferences
+
+      move to upstream's `prefs.json` format, and ESP32-S3 repeaters can finally light-sleep.
+      Underneath,
+
+      the mesh core, radio drivers and companion protocol handling were rebuilt against upstream
+      MeshCore's
+
+      text so the two codebases read the same again. Also: GPS reliability fixes, more accurate
+      battery
+
+      reporting, reduced flash wear, and the remote CLI (protocol v14) now executes commands sent by
+
+      contacts you have allowed to use it, matching upstream.
+
+
+      > [!NOTE]
+
+      > A normal upgrade keeps your identity, settings, contacts and phone pairing. Preferences are
+
+      > migrated to the new `prefs.json` format on first boot; the old binary file is kept alongside
+      it, so
+
+      > a downgrade still boots with your existing settings.
+
+
+      ---
+
+
+      ## Companion over WiFi
+
+
+      Boards that declare `capabilities: wifi` in their manifest — PSRAM ESP32-S3 boards, Heltec
+      WiFi LoRa
+
+      32 V3 (140 contacts), Wireless Tracker (130), and both C6 boards (280) — can now run the
+      companion
+
+      app over WiFi instead of BLE/USB, using upstream's `wifi.ssid`/`wifi.pwd`/`wifi.enabled` CLI
+      and TCP
+
+      port 5000. ESP32-S3 boards without PSRAM get bounded WiFi buffers and a measured 72 KB heap;
+      PSRAM
+
+      boards keep a 72 KB internal heap.
+
+
+      Getting there also fixed two ESP32 WiFi stability bugs that showed up under load (~200+
+      frames/s
+
+      unicast): the WiFi driver's RX callback could block the WiFi task, and the WiFi heap living in
+      PSRAM
+
+      could corrupt the shared multi-heap. Both are fixed via upstream Zephyr/hal_espressif patches.
+
+
+      ## Preferences are now `prefs.json`
+
+
+      Settings move from ZephCore's own binary layout to upstream's `ConfigSerializer`-based
+      `prefs.json`,
+
+      using upstream's key names for shared fields and ZephCore's own under a `zc` namespace. On
+      first boot
+
+      after upgrading, the old binary prefs (companion or repeater/room-server) are read once and
+      migrated;
+
+      the old file is left in place, so a downgrade still finds its settings.
+
+
+      Three related bugs were fixed along the way:
+
+
+      - A failed write could leave a server's prefs file truncated. Identity, prefs and channel
+      writes now
+        go through one checked atomic replace.
+      - A corrupted `cad_auto` byte turned adaptive CAD off instead of falling back to its default
+      of on.
+
+      - A repeater's GPS duty cycle, deliberately set to 300 seconds, was being silently rewritten
+      back to
+        48 hours on every boot. That migration path now only runs against legacy prefs files.
+
+      ## ESP32-S3 repeaters now actually light-sleep
+
+
+      Repeater builds for the Heltec WiFi LoRa 32 V3, V4 and V4.3 and the Wireless Tracker and
+      Wireless
+
+      Tracker V2 have shipped with light sleep enabled, but it never worked, for two independent
+      reasons,
+
+      both now fixed:
+
+
+      - Every S3 repeater carries WiFi OTA, and the WiFi driver started WiFi at boot — which holds a
+      modem
+        power-management lock for as long as WiFi is up. Measured on a XIAO: zero sleep entries with WiFi
+        compiled in. WiFi now stops at boot on power-management builds, and starts again on `start ota` or
+        a station connect.
+      - The radio interrupt line (DIO1) could not wake the chip. The wake mechanism used (ESP32
+      "EXT1")
+        allows only one trigger polarity for all its pins; since 1.17.1 the active-low user button was
+        armed on it as well, and that silently disarmed the active-high DIO1. DIO1 and the user button are
+        now per-pin level wakes that work on any pin, and the interrupt a sleep swallowed is re-raised
+        afterwards so the radio and button handlers still run. Boards with DIO1 on a non-RTC pin (XIAO
+        ESP32-S3, Station G2) can now light-sleep too; they are not switched on by default yet.
+
+      The pins the radio depends on (chip select, reset, RF switch, FEM enable and supply) are now
+      held at
+
+      their level through each sleep: light sleep otherwise lets every unheld pin float while the
+      radio
+
+      keeps receiving.
+
+
+      Verified on a XIAO ESP32-S3 repeater on a live mesh against a T1000-E on the same channel:
+      asleep
+
+      96.6% of uptime, 119 packe
+
+      …
   - version: 1.17.6a-zephcore
     name: Firmware 1.17.6a-zephcore
     datetime: '2026-09-26T17:39:32Z'
@@ -888,9 +1022,3 @@ releases:
     url: https://github.com/liquidraver/ZephCore/releases/tag/v20260605.132226
     prerelease: false
     notes: "## New\r\n\r\n**USB serial console for companions**\r\nConfigure companion devices (e.g. Wio Tracker L1) by typing commands over USB, no phone app needed.\r\nWorks in the flasher.meshcore.io serial console (or any terminal), just like the repeater CLI. Stays out of the way of the Bluetooth/USB app — only one connection is active at a time.\r\n\r\n**Battery gauge calibration (`adc.multiplier`)**\r\nCorrect the battery voltage reading so the % is accurate for your device:\r\n- `set adc.multiplier full` — calibrate at full charge (easiest)\r\n- `set adc.multiplier target <mV>` — calibrate to a multimeter reading (most accurate)\r\n- `set adc.multiplier 0` — reset to default\r\n- `get adc.multiplier` — show current\r\n\r\n**Per-device battery curves**\r\nBattery % now uses a real, device-specific voltage curve instead of a rough estimate, so readings are far more accurate.\r\nIncluded for Wio Tracker L1, T1000-E, SenseCAP Solar, ThinkNode M6, and RAK WisMesh Tag (others use a sensible default).\r\n\r\n**Low-battery auto-shutdown**\r\nBattery-powered companions now power down automatically when the cell runs low (default 3.3 V, ~10% on the new curves) to protect it from over-discharge.\r\nShows a brief \"Low Battery — Shutting Down\" notice first (3 s on OLED; e-paper just leaves it on screen), and is skipped while charging or on USB power so it never cuts out a plugged-in device.\r\nOn by default for nRF52 companions.\r\nTune it over the USB console:\r\n- `set autoshutdown <mV>` — set the cutoff (1–5000 mV)\r\n- `set autoshutdown 0` — turn it off\r\n- `get autoshutdown` — show current\r\n\r\n**Clock source indicator**\r\nThe time in the top bar now shows a tiny letter telling you where it was last synced from: **G** (GPS), **A** (phone app), **N** (network), or **L** (local).\r\nIf the device hasn't heard from GPS or the app in the last 12 hours, it falls back to **L** — the clock is just free-running on the device's own crystal at that point (drift is only a few seconds a day, so it stays accurate, but you know it isn't being checked against an outside source).\r\nAfter a restart it shows **L** until the first sync.\r\n\r\n## Fixed\r\n\r\n**Device name no longer overlaps the clock**\r\nOn the home screen, a long device name used to run underneath the time and battery in the top bar, making both unreadable.\r\nThe name is now trimmed to fit the space before the clock, on any screen size."
-  - version: v20260603.123327
-    name: Firmware v20260603.123327
-    datetime: '2026-06-03T12:33:43Z'
-    url: https://github.com/liquidraver/ZephCore/releases/tag/v20260603.123327
-    prerelease: false
-    notes: "(Re-Released because of native linux bugfixes)\r\n\r\nNew\r\n\r\n- Room Server (BBS) role (no auto-build, no repeater function)\r\n- GAT562 30S Mesh Kit board support (nRF52840 + SX1262, RAK4631 core, 30 dBm PA) — one image for both the full kit and the screenless solar repeater.\r\n- Production is now the default build — no more prod.conf; debug.conf is the opt-in for logging.\r\n- USB companion decoupled from logging — CDC ACM transport now compiles independently of CONFIG_LOG. (companions are USB+BLE hybrid from now, only one type can be connected at a time)\r\n- Linux native target — built and shipped as executables (companion + repeater).\r\n- Battery reading should be more precise with board specific curve support and a standard lipo curve for devices that does not have any data on the internet about it's curve\r\n\r\nBug Fixes\r\n\r\n- USB cable-yank no longer strands the companion on USB and blocks BLE until reboot.\r\n- BLE/USB transport handoff reworked to first-come-first-served, made thread-safe.\r\n- Zero-delay direct/zero-hop sends over BLE/USB no longer stall.\r\n- Channel reply from the Unread screen now sends instead of silently failing.\r\n- Repeater anon reply with a malformed return path now floods (safe fallback) instead of emitting a corrupt direct packet.\r\n- Header-error frames now counted as receive errors (and no more zombie packet receptions triggered)\r\n- Airtime/LDRO estimate fixed to track the driver across every SF/BW.\r\n- RNG seed derivation hardened against hash failure.\r\n\r\nInternals\r\n\r\n- Crypto: orlp/ed25519 → Monocypher 4.0.2 — audited, single-file. Existing identities load/sign/verify unchanged — no re-key, no migration, full wire compatibility.\r\n- Bumped west / pinned Zephyr tree.\r\n- Synced with vanilla MeshCore dev.\r\n- Split RepeaterMesh into Uplink + RegionCLI; deduped app-layer response/telemetry/JSON builders.\r\n- Simplified the packet manager, dispatcher, and radio config paths."
