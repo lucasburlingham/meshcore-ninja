@@ -1,7 +1,79 @@
 source: github
 repo: Yeraze/meshmonitor
-updatedAt: '2026-09-25T23:10:29.625Z'
+updatedAt: '2026-09-27T07:45:43.218Z'
 releases:
+  - version: v4.16.2-rc4
+    name: v4.16.2-rc4
+    datetime: '2026-09-27T03:24:18Z'
+    url: https://github.com/Yeraze/meshmonitor/releases/tag/v4.16.2-rc4
+    prerelease: true
+    notes: >-
+      # MeshMonitor v4.16.2-rc4
+
+
+      > ⚠️ **Pre-release.** This is a release candidate for testing. Back up your database before
+      upgrading.
+
+
+      ## Summary
+
+      rc4 adds likely-aircraft detection: nodes flying well above the terrain are flagged, badged on
+      the map, kept out of Auto-Favorite, optionally aged out, and can draw flight trails. MQTT
+      sources now store position history, so Position History and trails work for nodes heard only
+      over MQTT. Nodes gain a per-source First Heard time, and the Nodes tab gains a quick age
+      filter that never changes the saved setting. MeshCore channels can be sorted in MeshMonitor
+      and, new in this release, reordered on the companion itself, with history and settings
+      following each channel. MQTT and MeshCore sources no longer borrow the primary Meshtastic
+      radio for sends, config writes or status, which also closes a hole that exposed the primary
+      node's private key on MQTT broker sources. Several MeshCore timing bugs are fixed: Last Heard
+      no longer advances for powered-off nodes, drifted clocks no longer break sorting, and new-node
+      notifications fire again. A max node age of 0 now means "all nodes" everywhere, and the local
+      node number is read correctly on every source. This release adds migrations 175–179.
+
+
+
+      ### Added
+
+      - **Likely-aircraft detection.** A node flying more than a set height above the terrain
+      beneath it (default 500 m; 5000 m above sea level when there is no terrain data) is flagged as
+      a likely aircraft. Mountaintop repeaters stay fixed. Per source, in Settings → Node Display.
+      Migrations 175–178. (#5364, #5365, #5386, #5391, #5396)
+        - The map shows a plane badge and popup line, with a Show / Mark / Hide control in both Map Features panels.
+        - Auto-Favorite skips likely aircraft by default, and a new automation trigger fires when a node becomes one.
+        - Optional age-out ignores (or, opt-in, deletes) aircraft not heard for N hours, and lifts the ignore when a live position arrives. A node that stays put is reclassified as fixed.
+        - Flight trails, off by default, draw each aircraft's recent path with a 1 h–7 day lookback.
+        - MQTT sources now store position history, so Position History and trails work for nodes heard only over MQTT.
+      - **First Heard** for Meshtastic and MeshCore nodes, per source: set once from the first
+      believable reception and never overwritten. Shown in node details, map popups and the node
+      export. Migration 179 fills it for existing nodes from the earlier of `createdAt` and Last
+      Heard. (#5390, #5395)
+
+      - **Nodes tab quick age filter** (Setting / 24h / 3d / 7d / 30d / All) in the Nodes header. It
+      changes the view only, never the saved setting, and applies to the Nodes list and its map for
+      Meshtastic and MeshCore. (#5387, #5394)
+
+      - **MeshCore channel order:** a sort dropdown on the Channels page (device order, name, last
+      message, custom), with drag-and-drop for the custom order. Stored per browser. (#5385, #5392)
+
+      - **Reorder MeshCore channel slots on the companion** from Channels settings. Each slot write
+      is read back, a failure restores the original layout, and message history, unread markers,
+      scope, per-channel permissions and MeshCore auto-ack / announce / responder / timer settings
+      follow each channel. Connected Virtual Node apps are disconnected so they re-read the list.
+      Automations that name a raw channel number are listed for review, not rewritten. (#5379,
+      #5397)
+
+      - **Unified Messages hop counts:** each source tag shows how many hops that source heard the
+      message at (`?` when unknown). (#5366, #5393)
+
+      - **Transmit target window** (Settings → Node Display, default 24 h, 1–720): when the node
+      window is 0 ("all"), auto-traceroute, the remote-admin scanner and remote LocalStats pick
+      targets from nodes heard within this window instead of none. (#5376, #5384)
+
+      - **Virtual Node PKI import** opt-in (`allowPkiImport`, off by default) for the MeshCore
+      ImportPrivateKey command, and a Virtual Node card on the MeshCore Node Info view showing its
+      status, admin and PKI settings. (#5350, #5372, #5380
+
+      …
   - version: v4.16.2-rc3
     name: v4.16.2-rc3
     datetime: '2026-09-25T20:21:44Z'
@@ -2257,95 +2329,3 @@ releases:
       - #4965 
 
       …
-  - version: v4.15.2-rc8
-    name: v4.15.2-rc8
-    datetime: '2026-08-30T22:03:05Z'
-    url: https://github.com/Yeraze/meshmonitor/releases/tag/v4.15.2-rc8
-    prerelease: true
-    notes: >-
-      # MeshMonitor v4.15.2-rc8
-
-
-      > ⚠️ **Pre-release** — this is a release candidate for testing. Docker images are not tagged
-      `:latest`.
-
-
-      This candidate reworks the Mesh Issues Router Cluster rule after real-world feedback: clusters
-      are now mutually-audible cliques instead of transitive connected components, groups glued only
-      by shared-gateway co-reception downgrade to info, and a new tunable distance guard (default 30
-      km) filters MQTT-bridged traceroute "hops" that never happened over RF — on a live Florida
-      mesh this cut phantom clusters from 345 km spans to coherent metro pods. The B2 Redundant
-      Router rule gains the same range gate, so routers 40–120 km apart are no longer called
-      redundant coverage of each other. Router Cluster cards also gain a Show map toggle that plots
-      the members with the best-sited node highlighted. Purging telemetry from a node's charts works
-      again for every source type — the request was missing its sourceId and always failed. The Mesh
-      Issues report also picks up the A5 telemetry-cadence clause, wire-level pagination, and a
-      tunable auto-close setting.
-
-
-      ## Bug Fixes
-
-      - #4977 — Mesh Issues: Router clusters are mutually-audible cliques with a distance guard;
-      co-reception-only groups downgrade to info; B2 covered-by pairs range-gated (#4976)
-
-      - #4973 — Telemetry purge sends sourceId, fixing "Failed to purge telemetry data" for MeshCore
-      and all sources (#4963)
-
-
-      ## Features
-
-      - #4975 — Mesh Issues: map on Router Cluster findings with member markers and best-sited
-      highlight (#4974)
-
-      - #4972 — Mesh Issues post-epic follow-ups: A5 telemetry-cadence clause, wire-level
-      pagination, auto-close setting (#4964)
-
-
-      ## Chores
-
-      - #4980 — version bump to 4.15.2-rc8
-
-
-      ## Issues Resolved
-
-      - #4976 — B1 Router cluster merges far-apart routers via transitive chains
-
-      - #4974 — Mesh Issues: show a map on Router Cluster findings
-
-      - #4963 — Purge Telemetry fails for MeshCore sources
-
-      - #4964 — Mesh Issues epic (post-epic follow-ups)
-
-
-      **Full changelog:** https://github.com/Yeraze/meshmonitor/compare/v4.15.2-rc7...v4.15.2-rc8
-
-      ## 🚀 MeshMonitor v4.15.2-rc8
-
-
-      ### 📦 Installation
-
-
-      **Docker (recommended):**
-
-      ```bash
-
-      docker run -d \
-        --name meshmonitor \
-        -p 8080:3001 \
-        -v meshmonitor-data:/data \
-        ghcr.io/Yeraze/meshmonitor:4.15.2-rc8
-      ```
-
-
-      ### 🧪 Testing
-
-      ✅ All tests passed
-
-      ✅ TypeScript checks passed
-
-      ✅ Docker images built for linux/amd64, linux/arm64, linux/arm/v7
-
-
-      ### 📋 Changes
-
-      See commit history for detailed changes.
