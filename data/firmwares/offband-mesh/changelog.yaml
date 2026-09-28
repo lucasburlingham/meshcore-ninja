@@ -1,7 +1,109 @@
 source: github
 repo: OffbandMesh/meshcore-firmware
-updatedAt: '2026-08-30T11:29:43.964Z'
+updatedAt: '2026-09-28T13:14:13.588Z'
 releases:
+  - version: offband-v1.5.0-beta7
+    name: Offband offband-v1.5.0-beta7
+    datetime: '2026-09-28T07:08:21Z'
+    url: https://github.com/OffbandMesh/meshcore-firmware/releases/tag/offband-v1.5.0-beta7
+    prerelease: true
+    notes: >-
+      **Pre-release, for testers.** Six weeks and 119 commits since beta6. The app shows
+      `1.5.0-beta7-1.17.0` once a device is upgraded.
+
+
+      ### Take this build if you run an ESP32 node
+
+
+      Since #266 the `startWatchdog`/`feedWatchdog` calls sat inside `#if defined(NRF52_PLATFORM)` —
+      so **no ESP32 repeater or companion has ever armed the task watchdog.** A hung main loop
+      stayed hung until somebody reset the board by hand. Solar and rooftop nodes are where that
+      hurts, because nobody is standing next to them.
+
+
+      **Cause:** the guard's original reason was bridge builds blocking >30 s on network calls. That
+      no longer holds — MQTT runs in its own task and the loop's network calls time out in seconds.
+
+
+      **Now:** a hung main loop on any ESP32 board reboots within 30 s and reports
+      `reset_reason=TASK_WDT`. nRF52 behaviour is unchanged. `WDT_TIMEOUT_SECS` (default 30) is the
+      single build flag for an env that proves it needs longer. CI blocks the regression, and the
+      guard sees through line continuations and same-file aliases.
+
+
+      Two new console verbs: `wdt status` answers from the board — whether arming actually succeeded
+      — rather than from the build flag. `wdt hang` is diagnostic-only and never in a release image.
+
+
+      ### USB companions
+
+
+      Three separate faults on `_usb` builds, all fixed:
+
+
+      - **Debug text in the protocol stream.** On a `_usb` companion, `Serial` *is* the framed
+      companion protocol. Three paths wrote plain text into it, so a stock MeshCore client parsed
+      one "unexpected frame type" per byte — settings rendered empty and the channel list never
+      arrived.
+
+      - **Frames stalling on 64-byte boundaries.** A frame whose on-wire length was a multiple of
+      the USB max packet size was held host-side until the next write. The terminator is now
+      deferred, which keeps the non-blocking frame path non-blocking.
+
+      - **Console replies** gained the same zero-length terminator.
+
+
+      ### WiFi config no longer lies about saving
+
+
+      `set wifi.ssid`, `set wifi.pwd` and `wifi enable`/`disable` discarded the NVS write result, so
+      a failed write still returned the success acknowledgement. You were told the value was stored;
+      it was silently gone after a reboot. `wifi clear all` also named only `pwd` when both keys
+      failed to erase, so an operator could conclude the SSID was cleared while the node kept
+      reconnecting to the old network.
+
+
+      ### Observer log forwarding
+
+
+      Forwarding to a syslog sink is wired on all six observer envs. The sink is stored in NVS so it
+      survives a reboot, a window can run until you switch it off, and the capture ring is read
+      through a non-destructive cursor so forwarding never consumes what it forwards. An armed
+      forward names a capture stop to the sink, so a reader can tell capture is off while the
+      forward is still armed.
+
+
+      `caplog forward` no longer touches the WiFi link — arming used to overwrite whatever you had
+      set with `wifi on`, and disarming tore the link down.
+
+
+      ### Boot and shutdown reporting
+
+
+      Every reset is named, with why the board went down. The runtime is saved at shutdown.
+      Previous-boot uptime and `rtc_count` report what they claim, and a previous-boot runtime
+      recovered from NVS prints as a **floor** rather than presenting itself as a measurement.
+
+
+      ### Queen City Con 0x4 badge
+
+
+      New board and standalone messaging on it: CardKB keyboard driving the UI, channel and DM sends
+      with retries and an ACK tick when a repeater is heard passing a channel send on, a message
+      store with conversations and unread counts, Messages as Home with inline compose, and Contacts
+      / Nearby / Status / GPS / Settings on the SW1 cycle. Text size and screen-off are settings;
+      the battery bar follows a measured lithium curve and learns the badge's own 100% from the
+      charger settling.
+
+
+      Badge binaries publish with the release, diag build included.
+
+
+      **Under test.** The badge's Epic 2 verification (#1208) is still open, and with a GPS module
+      fitted the badge holds it powered the whole time it is enabled — 2.5–3 days of battery against
+      over a week without one. Duty cycling (#1288) is filed and is
+
+      …
   - version: offband-v1.5.0-beta6
     name: Offband offband-v1.5.0-beta6
     datetime: '2026-08-30T07:55:25Z'
@@ -1226,56 +1328,3 @@ releases:
     url: https://github.com/OffbandMesh/meshcore-firmware/releases/tag/offband-v0.19.0-rc1
     prerelease: true
     notes: "## Display `_sys` enhancements (RC1 — for testing)\r\n\r\nTwo new observer/companion display controls over the `_sys` channel:\r\n\r\n- **Display always-on** (#141) — `display always on` keeps the screen lit; `display normal` restores the 15\_s blank. *(Verified: V3/V4 OLED + V4 TFT.)*\r\n- **Display rotation 0/180** (#148) — `display rotate 0` / `display rotate 180` / `display flip` flip the screen for upside-down mounting. *(Verified: V3/V4 OLED.)*\r\n\r\n> ⚠️ **TFT 180° rotation is UNVERIFIED — this is the thing to test.** On the Heltec V4 **TFT** (`heltec_v4_tft_companion_observer_wifi`), `display rotate 180` uses a best-guess MADCTL combo (`flipScreenVertically`). Please confirm it gives a clean **180° flip** (upside-down but readable), not a mirror or garbled image. `display rotate 0` should return to normal; `display flip` should toggle. Report back — it's a one-line fix if the combo is wrong.\r\n\r\n**TFT flash:** `heltec_v4_tft_companion_observer_wifi-v0.19.0-rc1-14bc32d-merged.bin` (full image — web-flasher **\"Full Firmware\"** for a fresh install), or the `.bin` (app-only) to update an existing node and keep its identity/config.\r\n\r\n---\r\n\r\n### Which file do I download?\r\n\r\n| File | What it is | When to use it |\r\n|---|---|---|\r\n| `*-merged.bin` (ESP32 — Heltec V3/V4, XIAO) | **Full image** — bootloader + partition table + app in one, flashed at `0x0` after a chip erase. Self-contained, works on a blank chip. | **First install / clean setup.** In a web flasher this is the **\"Full Firmware\"** option. |\r\n| `*.bin` (ESP32) | **App only** — flashed at the app offset (`0x10000`); the bootloader must already be on the chip. | **Updating** an existing node — OTA / **\"Update Only.\"** Keeps the device identity + WiFi/MQTT config. |\r\n| `*.uf2` (nRF52 — RAK, T-Echo, XIAO nRF52) | Complete self-contained image. | **First install *and* updates** — double-tap reset, then drag-drop onto the USB drive. (nRF52 has no merged/app split.) |\r\n\r\n> ⚠️ **ESP32:** the app-only `*.bin` will **not boot** if flashed at `0x0` — use `*-merged.bin` for a fresh install. A full erase / \"Full Firmware\" wipes the device's identity + saved config, so use it only for a first install or recovery, **never** a routine update.\r\n\r\n\r\n**Full Changelog**: https://github.com/OffbandMesh/meshcore-firmware/compare/offband-v0.18.1...offband-v0.19.0-rc1"
-  - version: offband-v0.18.1
-    name: Offband offband-v0.18.1
-    datetime: '2026-06-15T03:08:16Z'
-    url: https://github.com/OffbandMesh/meshcore-firmware/releases/tag/offband-v0.18.1
-    prerelease: false
-    notes: >-
-      ### Fixed
-
-      - **WiFi password confirmation wording** — `set wifi.pwd` now replies
-        `wifi.pwd set (N chars entered)` instead of `wifi.pwd set (length=N)`, which was
-        being misread as a 17-character maximum. The reply reports the length of what was
-        *entered* (never the secret PSK); it is not a cap. WiFi passwords accept the full
-        WPA2 range (8–63 chars).
-
-
-      ---
-
-
-      ### Which file do I download?
-
-
-      | File | What it is | When to use it |
-
-      |---|---|---|
-
-      | `*-merged.bin` (ESP32 — Heltec V3/V4, XIAO) | **Full image** — bootloader + partition table
-      + app in one, flashed at `0x0` after a chip erase. Self-contained, works on a blank chip. |
-      **First install / clean setup.** In a web flasher this is the **"Full Firmware"** option. |
-
-      | `*.bin` (ESP32) | **App only** — flashed at the app offset (`0x10000`); the bootloader must
-      already be on the chip. | **Updating** an existing node — OTA / **"Update Only."** Keeps the
-      device identity + WiFi/MQTT config. |
-
-      | `*.uf2` (nRF52 — RAK, T-Echo, XIAO nRF52) | Complete self-contained image. | **First install
-      *and* updates** — double-tap reset, then drag-drop onto the USB drive. (nRF52 has no
-      merged/app split.) |
-
-
-      > ⚠️ **ESP32:** the app-only `*.bin` will **not boot** if flashed at `0x0` — use
-      `*-merged.bin` for a fresh install. A full erase / "Full Firmware" wipes the device's identity
-      + saved config, so use it only for a first install or recovery, **never** a routine update.
-
-
-
-      ## What's Changed
-
-      * fix(observer): wifi.pwd confirmation wording (0.18.1) by @Strycher in
-      https://github.com/OffbandMesh/meshcore-firmware/pull/139
-
-
-
-      **Full Changelog**:
-      https://github.com/OffbandMesh/meshcore-firmware/compare/offband-v0.18.0...offband-v0.18.1

@@ -1,7 +1,88 @@
 source: github
 repo: Yeraze/meshmonitor
-updatedAt: '2026-09-27T07:45:43.218Z'
+updatedAt: '2026-09-28T13:14:34.722Z'
 releases:
+  - version: v4.16.2-rc5
+    name: v4.16.2-rc5
+    datetime: '2026-09-28T04:45:38Z'
+    url: https://github.com/Yeraze/meshmonitor/releases/tag/v4.16.2-rc5
+    prerelease: true
+    notes: >-
+      # MeshMonitor v4.16.2-rc5
+
+
+      > ⚠️ **Pre-release.** This is a release candidate for testing. Back up your database before
+      upgrading.
+
+
+      ## Summary
+
+      rc5 adds asset tracking: flag a node as an asset to keep its history longer, see its whole
+      trail and replay the trip on a timeline. Likely aircraft can now be matched to a real flight
+      through a community ADS-B feed (off by default). Nodes whose coordinates were entered with the
+      wrong sign can be shown in the right place, and the MQTT bridge can keep MeshMonitor's own
+      automation traffic off the upstream broker (both off by default). MeshCore remote logins wait
+      longer, retry on silence and show progress with a Cancel button, and neighbour lists now fetch
+      the whole table instead of stopping at 10. OTA firmware updates now use the selected source
+      and its custom TCP port, find binaries in 2.8.0's platform folders, and match the board list
+      to the real release names, refusing boards that share several builds. The Helm chart can
+      expose Virtual Node ports and pin a LoadBalancer IP. This release adds migrations 180 and 181.
+
+
+
+      ### Added
+
+      - **Asset tracking.** Flag a node as an asset in Node Details → Asset tracking to keep its
+      telemetry for 1–365 days (default 90) on every source, always draw its trail, and exempt it
+      from automated cleanups. The Nodes map draws the asset's whole retained history, thinned to
+      keep its shape, and a playback bar replays the trip with a moving marker at 60×/600×/3600×.
+      Migration 181. (#5354, #5411, #5419, #5422)
+
+      - **ADS-B flight matching for likely aircraft**, off by default. When a node becomes a likely
+      aircraft, MeshMonitor asks a community ADS-B feed (adsb.lol or adsb.fi) which flight is there,
+      at most twice per flagging, and shows the match in the popup and details. Migration 180.
+      (#5374, #5410)
+
+      - **Sign-flipped position correction**, off by default, per source. A node whose latitude or
+      longitude sign was entered wrong is shown at its mirror point when exactly one mirror lands
+      within range (default 500 km) of the source's own node or a set point, with a notice showing
+      the reported coordinates. Stored data never changes. Distance auto-delete, MQTT geo-ignore,
+      automation geofences, traceroute snapshots and MeshCore contacts all use the corrected point.
+      (#5363, #5409, #5412)
+
+      - **Drop automation traffic at the MQTT bridge uplink**, a per-bridge option, off by default.
+      MeshMonitor's own automated sends (auto-ack, responders, announce, timers, geofences,
+      Automation Engine actions, auto-ping and similar) never reach the upstream broker; manual
+      sends still do. A drop counter shows beside the ok_to_mqtt counter. (#5414, #5418)
+
+      - **Map clustering toggle** in Settings → Map, separate from the Map Click Zoom Gate. On by
+      default. (#5404, #5407)
+
+      - **Helm: expose Virtual Node ports** with `service.extraPorts`, pin a LoadBalancer IP with
+      `service.annotations` (MetalLB, kube-vip, Cilium) or `loadBalancerIP`, and optionally put the
+      Virtual Node on its own `virtualNodeService` so the web UI can stay behind an Ingress. (#5416,
+      #5417)
+
+
+      ### Changed
+
+      - **MeshCore remote logins wait longer and retry.** Each attempt waits the longer of twice the
+      firmware's estimate or 10 s, and the admin buttons try up to 3 times on silence (never on a
+      refused password). Every login screen shows live progress and a Cancel button. Behind a
+      reverse proxy, a worst-case login can now take about 34 s. (#5400, #5405)
+
+      - **MeshCore neighbour lists show the whole table.** The repeater sends at most 10 neighbours
+      per reply, so the Contact Details button and "Poll Neighbours" now fetch up to 5 pages, each
+      spaced by the 60 s radio gap, with live progress and Cancel. The scheduled autopoll stays at 1
+      page (strongest first) and merges into the stored list instead of shrinking it. (#5413, #5425)
+
+      - **OTA firmware updates run on the selected source.** Disconnect, reconnect, verify, retry
+      and cancel act on the source the update was started from, not the primary radio, and use its
+      custom TCP port. (#5424, #5428, #5432)
+
+      - **OTA 
+
+      …
   - version: v4.16.2-rc4
     name: v4.16.2-rc4
     datetime: '2026-09-27T03:24:18Z'
@@ -2205,127 +2286,5 @@ releases:
       - fix(mesh-issues): B1 requires client-overlap evidence, not just mutual audibility (#5000)
 
       - fix(map-analys
-
-      …
-  - version: v4.15.2-rc9
-    name: v4.15.2-rc9
-    datetime: '2026-08-31T23:47:14Z'
-    url: https://github.com/Yeraze/meshmonitor/releases/tag/v4.15.2-rc9
-    prerelease: true
-    notes: >-
-      # MeshMonitor v4.15.2-rc9
-
-
-      > ⚠️ **Pre-release** — this is a release candidate. Please test in a non-production
-      environment first and report issues.
-
-
-      ## Summary
-
-
-      This RC focuses on the Mesh Issues report and key-security correctness. The report page gets a
-      full reorganization — a dashboard-style landing, sortable per-type tables, a by-node view, and
-      bulk actions — plus a new test-reference doc explaining every A1/B2/C3 designator. Node
-      references in findings are now clickable everywhere they appear (headers, member chips,
-      "shared with" lists), open the DM thread on the right source, and a source picker fires when a
-      node exists on multiple sources. B1 Router Cluster is tightened twice: it now requires the
-      members' non-cluster clients to overlap significantly (a well-sited backbone stops flagging as
-      redundant), and edges must be within the configurable distance guard so MQTT can't glue
-      routers 100+ km apart into one finding. On the C1 side, source-blind reads in the key-mismatch
-      path were producing false-positive `keyMismatchDetected` warnings and leaving old flags stuck
-      forever; both are fixed, and migration 155 cleans up the stale rows. The 2.8-firmware renumber
-      suppressor now also fires on a temporal-handoff signal, catching the MQTT-replay case where a
-      gateway keeps rebroadcasting a node's pre-2.8 identity. Long free-text cells in the report now
-      wrap at 28rem instead of stretching the table into horizontal scroll. Elsewhere: MQTT
-      violations no longer false-positive on private brokers, MeshCore neighbours show a real "last
-      heard" age, map-analysis trails render cleaner and autozoom correctly, measuring distance no
-      longer intercepts map panning, and Indonesian joins the language picker.
-
-
-      ## Features
-
-
-      - feat(i18n): ship the Indonesian translation and offer it in the picker (#5003)
-
-      - feat(mesh-issues): clickable node references with source picker + Details-column wrap + 2.8
-      renumber MQTT-replay fix (#5002)
-
-      - feat(mesh-issues): reorganize the report — dashboard, tables, by-node view, bulk actions
-      (#4964) (#4981)
-
-
-      ## Bug Fixes
-
-
-      - fix(key-security): scope keyMismatch reads by source; clear stale flags (#5001)
-
-      - fix(mesh-issues): B1 requires client-overlap evidence, not just mutual audibility (#5000)
-
-      - fix(map-analysis): improve trail rendering and autozoom (#3788) (#4999)
-
-      - fix: preserve map panning while measuring distance (#4965) (#4998)
-
-      - fix(analysis): annotate ok_to_mqtt violations with broker classification (#4982) (#4996)
-
-      - fix(meshcore): age stored neighbour "last heard" instead of showing 0s ago (#4978) (#4979)
-
-      - fix(mesh-issues): B1 router clusters are mutually-audible cliques with a distance guard
-      (#4976) (#4977)
-
-
-      ## Docs
-
-
-      - docs: add mesh issues test reference page (#4997)
-
-      - docs: note known mqtt-proxy TLS field-name bug (#4995)
-
-
-      ## Dependencies
-
-
-      - chore(deps): bump maplibre-gl from 6.4.1 to 6.6.0 (#4993)
-
-      - chore(deps): bump the codeql-action group with 4 updates (#4992)
-
-      - chore(deps-dev): bump @tanstack/react-query-devtools from 5.101.4 to 5.102.8 (#4991)
-
-      - chore(deps): bump lucide-react from 1.33.0 to 1.35.0 (#4990)
-
-      - chore(deps-dev): bump @typescript-eslint/parser from 8.67.0 to 8.68.0 (#4989)
-
-      - chore(deps): bump @rollup/rollup-linux-arm64-musl from 4.62.5 to 4.63.1 (#4988)
-
-      - chore(deps): bump otplib from 13.4.1 to 13.5.0 (#4987)
-
-      - chore(deps): bump @rollup/rollup-linux-arm-gnueabihf from 4.62.5 to 4.63.0 (#4986)
-
-      - chore(deps): bump protobufjs from 8.7.2 to 8.8.0 (#4985)
-
-      - chore(deps): bump the production-dependencies group with 2 updates (#4984)
-
-      - chore(deps-dev): bump the development-dependencies group with 6 updates (#4983)
-
-
-      ## Chore
-
-
-      - chore: bump version to 4.15.2-rc9 (#5004)
-
-      - chore: bump version to 4.15.2-rc8 (#4980)
-
-
-      ## Issues Resolved
-
-
-      - #4994 [BUG] MQTT proxy does not recognize Meshtastic tls_enabled configuration
-
-      - #4982 ok_to_mqtt Violations report: false positives for private MQTT brokers
-
-      - #4978 [BUG] Meshcore Neighbors bug
-
-      - #4976 B1 Router cluster merges far-apart routers via transitive chains
-
-      - #4965 
 
       …
