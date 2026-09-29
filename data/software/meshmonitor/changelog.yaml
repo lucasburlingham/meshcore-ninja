@@ -1,7 +1,92 @@
 source: github
 repo: Yeraze/meshmonitor
-updatedAt: '2026-09-28T13:14:34.722Z'
+updatedAt: '2026-09-29T08:02:40.973Z'
 releases:
+  - version: v4.16.2-rc6
+    name: v4.16.2-rc6
+    datetime: '2026-09-29T02:38:34Z'
+    url: https://github.com/Yeraze/meshmonitor/releases/tag/v4.16.2-rc6
+    prerelease: true
+    notes: >-
+      # MeshMonitor v4.16.2-rc6
+
+
+      > ⚠️ **Pre-release.** This is a release candidate for testing. Back up your database before
+      upgrading.
+
+
+      ## Summary
+
+      rc6 adds simple per-source **Message Forwarding** next to the Auto-Responder on both
+      Meshtastic and MeshCore, with hard limits of 5 forwards per minute per rule and built-in loop
+      guards. MeshCore gains client-side **Ignore and Block** for nodes and text patterns, since the
+      firmware has none. The Automation Engine can now enable, disable or toggle another automation
+      with `action.setAutomationEnabled`, and the map picker adds CARTO vector basemaps plus a
+      bundled **CARTO Voyager Dark** style. MeshCore contacts corrupted by dropped serial bytes are
+      now rejected and their names cleaned, and Last Heard uses the companion's own clock. The
+      Packet Monitor no longer logs firmware 2.8's NodeDB replay burst as fresh receptions. A long
+      run of UI fixes makes the Automation, Configuration and Settings pages fit a phone, makes
+      Geofence fields commit on blur, and keeps embedded maps under the sticky nav. Server-side
+      timers driven by user settings are now clamped, so an oversized interval can no longer fire
+      every millisecond. This release adds migration 182.
+
+
+
+      ### Added
+
+      - **Message Forwarding**, per source, next to the Auto-Responder on both Meshtastic and
+      MeshCore. Each rule copies a matching incoming message (DM or channel, optionally filtered by
+      sender or regex) to one node or another channel on the same source, with an optional `{from}`
+      / `{channel}` prefix. Each rule is hard-capped at 5 forwards per 60 s, at most 20 rules per
+      source, sends never retry, and NodeDB replays are never forwarded. Channel targets show an
+      airtime warning; receive-only and MQTT sources show the rules read-only. (#5446, #5455)
+
+      - **MeshCore Ignore and Block**, for nodes and text patterns. MeshCore firmware has no block
+      or mute, so MeshMonitor filters in the client. Ignore stores the message but skips
+      notifications, automations, auto-ack, auto-responder, forwarding and Virtual Node relay, and
+      folds runs into an "N ignored messages" row; Block drops the message on receipt. Text rules
+      match exact, wildcard or regex against the sender name, body or both. Controls sit under the
+      contact detail panel and in two new sections of the MeshCore source's Settings, each with hit
+      counts. Migration 182. (#5408, #5469)
+
+      - **`action.setAutomationEnabled`** in the Automation Engine enables, disables or toggles an
+      automation by id (literal or `{{ }}` template), replacing the `runScript` + `curl` + API token
+      workaround. (#5445, #5454)
+
+      - **CARTO vector basemaps** (Voyager, Positron, Dark Matter) in 2D, plus a bundled **CARTO
+      Voyager Dark** style: a dark map that keeps land-use colour. A CARTO key, when set, is added
+      to CARTO requests only. 3D and raster-only views use each preset's matching raster tiles.
+      (#5448, #5453)
+
+
+      ### Changed
+
+      - **The dev tileserver is opt-in**, and `tiles/` is a real directory again. A symlink
+      committed by accident left fresh clones with a dangling `tiles` link and crash-looped the dev
+      tileserver; `lint:ci` now rejects tracked symlinks. (#5470)
+
+      - **MQTT docs and help text** say Meshtastic declined meshtastic/firmware#11994 (a per-packet
+      `ok_to_mqtt` override) by design, and name the workarounds. The bridge-side drop from #5418
+      stays the supported answer. (#5452)
+
+      - **Blog:** a One Year of MeshMonitor retrospective. (#5456)
+
+      - **Translations updated from Hosted Weblate** (Indonesian). (#5464)
+
+      - **Tests:** every react-i18next mock now returns a stable `t`, which ends a class of latent
+      flakes; the EmbedSettings dialog and MeshCore neighbours-config flakes are fixed; the MySQL
+      outlier batch-delete test gets 60 s. (#5461, #5473, #5474)
+
+      - 10 Dependabot updates, including `maplibre-gl` 6.11.2, `aedes` 1.2.0 (MQTT broker security
+      fixes), `@tanstack/react-query`, `lucide-react`, `jsdom`, `puppeteer`, `supertest`, the CodeQL
+      actions, and the production and development groups. (#5435–#5444)
+
+
+      ### Fixed
+
+      - **Packet Monitor** logged firmware 2
+
+      …
   - version: v4.16.2-rc5
     name: v4.16.2-rc5
     datetime: '2026-09-28T04:45:38Z'
@@ -2118,173 +2203,3 @@ releases:
       ### 📋 Changes
 
       See commit history for detailed changes.
-  - version: v4.15.2
-    name: v4.15.2
-    datetime: '2026-09-01T13:20:45Z'
-    url: https://github.com/Yeraze/meshmonitor/releases/tag/v4.15.2
-    prerelease: false
-    notes: >-
-      # MeshMonitor v4.15.2
-
-
-      MeshMonitor 4.15.2 lands the Mesh Issues Analysis report — a scheduled, passive health scan of
-      the mesh that turns telemetry, RF adjacency, and per-node flags into a triaged list of
-      findings you can act on. This release also finishes the unified map controls sidebar across
-      every map surface, expands the Automation Engine with five new device-health triggers plus a
-      one-click template, adds a portnum filter and content search to the Packet Monitor, and gives
-      the MeshCore side per-source path-hash defaults, an autopoll-neighbours scheduler, and a
-      separate infrastructure age timeout. Backup Restore is now a one-click button. The header
-      cycles the connection badge through status, battery, and airtime. Nodes render in their
-      Meshtastic-app color scheme. Site Planner explains when its coverage circle stops matching
-      terrain. B1 Router Cluster is tightened twice, first with a configurable distance guard so
-      MQTT can't glue routers 100 km apart into one finding, and again with a client-overlap
-      requirement so a well-sited backbone stops flagging as redundant. Key-security detection gains
-      proper per-source scoping, and migration 155 clears the false-positive `keyMismatchDetected`
-      rows that the old bug left behind. Indonesian joins the language picker.
-
-
-      ## Features
-
-
-      ### Mesh Issues Analysis (new report)
-
-
-      - Mesh Issues report — Phase 1 foundation + Tier A rules (#4966)
-
-      - Tier B RF-graph rules — Phase 2 (#4967)
-
-      - Coverage preface, dismiss UI, Tier C, settings — Phase 3 (#4968)
-
-      - Post-epic follow-ups — A5 cadence, pagination, auto-close setting (#4972)
-
-      - Map on Router Cluster findings (#4975)
-
-      - Report reorganization — dashboard, tables, by-node view, bulk actions (#4981)
-
-      - Clickable node references with source picker (#5002)
-
-
-      ### Unified map controls sidebar
-
-
-      - Phase 1 (DashboardMap) (#4914)
-
-      - Phase 2 NodesTab map controls (#4919)
-
-      - MapAnalysis floating panels into the unified sidebar (#4920)
-
-      - MeshCore map floating panels into the unified sidebar (#4921)
-
-
-      ### Automation device-health triggers
-
-
-      - Node lifecycle triggers — heartbeat-lost & recovery (#4873)
-
-      - nodeRebooted trigger — uptime-reset detection (#4874)
-
-      - nodePowerChanged trigger — external power lost/restored (#4876)
-
-      - Noise floor as a telemetry alert field (#4877)
-
-      - batteryTrend trigger — declining-battery / solar proxy (#4878)
-
-      - Device Health template — quick-create node health alerts (#4881)
-
-      - MeshCore parity for device-health triggers (#4887)
-
-
-      ### Packet Monitor
-
-
-      - Full portnum filter + free-text content search (#4961)
-
-      - Stop capturing control on all packet monitors (#4960)
-
-
-      ### Scripts
-
-
-      - Installed Scripts inventory in global settings (#4956)
-
-
-      ### MeshCore
-
-
-      - Per-source Default Path Hash Size setting (#4951)
-
-      - Autopoll Neighbours — per-node retrieval scheduler (#4884)
-
-      - Telemetry time window selector in node details (#4970)
-
-      - Separate age timeout for infrastructure nodes (#4901)
-
-      - Send truly-unscoped floods, not the node default region (#4937)
-
-
-      ### Maps
-
-
-      - Zoom to Fit on the Unified/Dashboard map (#4902)
-
-      - Support a Carto basemap API key (#4936)
-
-      - Per-node colors (Meshtastic app algorithm) for pins + node lists (#4924)
-
-
-      ### Nodes
-
-
-      - "Show all" (0 = never) option to Maximum Age of Active Nodes (#4949)
-
-
-      ### Header
-
-
-      - Cycle the connection badge through status, battery, airtime (#4927)
-
-      - Move Disconnect/Reconnect into the System Status popup (#4912)
-
-
-      ### Backup
-
-
-      - Restore button on Device Backup Management (#4933)
-
-
-      ### Firmware
-
-
-      - Add a Nightly channel for develop (2.8.x) builds (#4950)
-
-
-      ### i18n
-
-
-      - Ship the Indonesian translation and offer it in the picker (#5003)
-
-      - Translations update from Hosted Weblate (#4903)
-
-
-      ### Site Planner
-
-
-      - Grouped toolbar controls into labeled dropdown menus (#4886)
-
-
-      ### Messages
-
-
-      - Show seconds in the reception Heard column (#4870)
-
-
-      ## Bug Fixes
-
-
-      - fix(key-security): scope keyMismatch reads by source, clear stale flags (#5001)
-
-      - fix(mesh-issues): B1 requires client-overlap evidence, not just mutual audibility (#5000)
-
-      - fix(map-analys
-
-      …
