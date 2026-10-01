@@ -1,11 +1,11 @@
 source: github
 repo: meshcore-go/meshcore-go
-updatedAt: '2026-09-26T04:05:40.033Z'
+updatedAt: '2026-10-01T22:27:27.844Z'
 releases:
   - version: v1.6.0
     name: v1.6.0
     datetime: '2026-09-26T01:16:09Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.6.0
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.6.0
     prerelease: false
     notes: >-
       ## What's Changed
@@ -21,7 +21,7 @@ releases:
   - version: v1.5.0
     name: v1.5.0
     datetime: '2026-09-17T05:22:35Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.5.0
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.5.0
     prerelease: false
     notes: >-
       ## openHop modems: the new `hardware/openhop` module
@@ -120,7 +120,7 @@ releases:
   - version: v1.4.0
     name: v1.4.0
     datetime: '2026-09-08T06:11:24Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.4.0
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.4.0
     prerelease: false
     notes: >-
       ## SPI radios: the new `hardware/sx12xx` module
@@ -219,7 +219,7 @@ releases:
   - version: v1.3.0
     name: v1.3.0
     datetime: '2026-09-07T05:35:52Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.3.0
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.3.0
     prerelease: false
     notes: >-
       Firmware fidelity release for the KISS modem, node timing and relay behaviour. Everything
@@ -324,7 +324,7 @@ releases:
   - version: v1.2.0
     name: v1.2.0
     datetime: '2026-09-03T03:40:18Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.2.0
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.2.0
     prerelease: false
     notes: >-
       Tracks MeshCore firmware **v1.17.1**. This release is mostly interoperability repair: several
@@ -415,7 +415,7 @@ releases:
   - version: v1.1.0
     name: v1.1.0
     datetime: '2026-08-24T03:10:03Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.1.0
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.1.0
     prerelease: false
     notes: >-
       ## What's Changed
@@ -429,7 +429,7 @@ releases:
   - version: v1.0.9
     name: v1.0.9
     datetime: '2026-06-28T23:14:47Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.0.9
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.0.9
     prerelease: false
     notes: >-
       ## Highlights
@@ -469,19 +469,19 @@ releases:
   - version: v1.0.8
     name: v1.0.8
     datetime: '2026-06-12T01:39:40Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.0.8
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.0.8
     prerelease: false
     notes: "# meshcore-go — v1.0.8\r\n\r\nMostly about getting us in line with MeshCore 1.16. There's one breaking change\r\n(SNR is now float32), so callers will need a small update.\r\n\r\n## 1.16 protocol\r\n\r\n- Companion serial protocol updated for 1.16: added `CMD_SEND_RAW_PACKET` (65),\r\n  default flood scope get/set (63/64, RESP 28) and the unscoped-flood sub-type,\r\n  and new push codes for LoginFail, ContactDeleted and ContactsFull.\r\n- Bumped MaxFrameSize 172 → 176 and now advertise protocol v3 so the firmware\r\n  sends V3 message-recv frames.\r\n- Renamed a few Companion constants to match firmware: `CmdSetRadioTxPower`,\r\n  `CmdGetBattAndStorage`, `CmdSetFloodScopeKey`, `RespBattAndStorage`.\r\n- ACKs now dedup by packet hash like everything else (1.16 dropped the separate\r\n  ACK-CRC table). Retransmitted ACKs get forwarded again instead of being\r\n  silently dropped.\r\n- KISS: treat a `TX_DONE` result of `0x00` as a failed transmit. Firmware 1.16\r\n  sends that on radio-busy / airtime timeout. Baseline is now 1.16+.\r\n- Text retransmits are recomposed per attempt (attempt encoded in the flags\r\n  byte, plus a `[0x00][attempt]` tail past attempt 3) so each retry has a unique\r\n  hash and survives dedup. ACK CRC is recomputed each attempt. Added\r\n  `BuildTextPlaintextWithAttempt`.\r\n\r\n## Other changes\r\n\r\n- SNR is now real dB (`float32`) everywhere instead of raw quarter-dB `int8`.\r\n  RSSI is unchanged and the raw path-SNR bytes are still preserved. **This is\r\n  breaking** — see below.\r\n- Added TX stats: `Node.TxStats()` returns a `TxStats` struct, plumbed through\r\n  the transport/modem/tx-engine layers.\r\n- Added `HasSignalInfo` through the modem/transport/peer path so we only apply\r\n  SNR/RSSI when the source actually has it (helps the TCP transport).\r\n- Peers can now carry multi-byte path hashes via `OutPathHashSize` (1, 2 or 4;\r\n  0 means default of 1); `SetOutPath` takes an optional hash size.\r\n- New `WithLearnedPathsOnly()` option to restrict advert paths to learned ones.\r\n- Name truncation now respects UTF-8 boundaries.\r\n\r\n## Breaking\r\n\r\n- SNR fields went `int8` → `float32` (real dB). `PeerTable.Update` is now\r\n  `Update(adv, snr float32, rssi int8, hasSignalInfo bool, pathHashes []byte)` —\r\n  update the call sites and stop treating SNR as raw quarter-dB."
   - version: v1.0.7
     name: v1.0.7
     datetime: '2026-06-12T01:21:32Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.0.7
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.0.7
     prerelease: false
     notes: "## What's Changed\r\n* v1.0.7 by @tuzzmaniandevil in https://github.com/meshcore-go/meshcore-go/pull/8\r\n\r\nDO NOT USE, Use 1.0.8 instead\r\n\r\n**Full Changelog**: https://github.com/meshcore-go/meshcore-go/compare/v1.0.6...v1.0.7"
   - version: v1.0.6
     name: v1.0.6
     datetime: '2026-05-10T23:40:26Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.0.6
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.0.6
     prerelease: false
     notes: >-
       ## What's Changed
@@ -495,7 +495,7 @@ releases:
   - version: v1.0.5
     name: v1.0.5
     datetime: '2026-05-06T23:49:25Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.0.5
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.0.5
     prerelease: false
     notes: >-
       ## What's Changed
@@ -509,7 +509,7 @@ releases:
   - version: v1.0.4
     name: v1.0.4
     datetime: '2026-05-04T01:13:55Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.0.4
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.0.4
     prerelease: false
     notes: >-
       ## What's Changed
@@ -525,7 +525,7 @@ releases:
   - version: v1.0.3
     name: v1.0.3
     datetime: '2026-04-30T23:24:59Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.0.3
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.0.3
     prerelease: false
     notes: |-
       ## What's Changed
@@ -536,7 +536,7 @@ releases:
   - version: v1.0.2
     name: v1.0.2
     datetime: '2026-04-29T23:43:32Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.0.2
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.0.2
     prerelease: false
     notes: |-
       ## What's Changed
@@ -547,7 +547,7 @@ releases:
   - version: v1.0.1
     name: v1.0.1
     datetime: '2026-04-29T09:46:52Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.0.1
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.0.1
     prerelease: false
     notes: >-
       ## What's Changed
@@ -565,6 +565,6 @@ releases:
   - version: v1.0.0
     name: v1.0.0
     datetime: '2026-04-28T03:11:35Z'
-    url: https://github.com/meshcore-go/meshcore-go/releases/tag/v1.0.0
+    url: https://github.com/OwlShack/meshcore-go/releases/tag/v1.0.0
     prerelease: false
     notes: '**Full Changelog**: https://github.com/meshcore-go/meshcore-go/commits/v1.0.0'
