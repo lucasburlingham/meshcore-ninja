@@ -1,7 +1,13 @@
 source: github
 repo: vicliu624/trail-mate
-updatedAt: '2026-09-30T21:59:27.600Z'
+updatedAt: '2026-10-01T01:13:19.637Z'
 releases:
+  - version: v0.1.52-alpha
+    name: v0.1.52-alpha
+    datetime: '2026-10-01T00:07:02Z'
+    url: https://github.com/vicliu624/trail-mate/releases/tag/v0.1.52-alpha
+    prerelease: true
+    notes: "## [0.1.52-alpha] - 2026-10-01\r\n\r\n### Fixed\r\n\r\n- Keep Geocaching rows stable during unrelated operations and query progress, and skip completed tasks during publication recovery.\r\n- Allow removed local caches to be downloaded again while protecting modified GPX files and safely resuming history cleanup.\r\n- Preserve current Geocaching indexes during checkpoint rebuilds and upgrade legacy local indexes during idle maintenance after writable recovery.\r\n- Upgrade legacy Downloaded metadata once without reading GPX; subsequent pages use current indexes only.\r\n\r\n\n\n## What's Changed\n* fix: speed up local Geocaching browsing for 0.1.52-alpha by @vicliu624 in https://github.com/vicliu624/trail-mate/pull/101\n\n\n**Full Changelog**: https://github.com/vicliu624/trail-mate/compare/v0.1.51-alpha...v0.1.52-alpha"
   - version: v0.1.51-alpha
     name: v0.1.51-alpha
     datetime: '2026-09-30T19:17:41Z'
@@ -284,9 +290,3 @@ releases:
     url: https://github.com/vicliu624/trail-mate/releases/tag/v0.1.32-alpha
     prerelease: true
     notes: "## [0.1.32-alpha] - 2026-06-27\n### Added / 新增\n- Added verified UF2 manual-flash release artifacts for both nRF52840 manual targets, `gat562_mesh_evb_pro` and `t-echo-lite`, checking the UF2 family ID `0xADA52840` while keeping `.hex` and `.zip` outputs as fallback/diagnostic assets alongside the existing ESP32 firmware targets. / 为两个 nRF52840 手动刷写目标 `gat562_mesh_evb_pro` 与 `t-echo-lite` 新增经过校验的 UF2 发布产物，检查 UF2 family ID `0xADA52840`，同时保留 `.hex` 与 `.zip` 作为备用和诊断产物，并随既有 ESP32 固件目标一起发布。\n- Added the T-Echo-Lite-KeyShield target to the project site device list so pre-release users can identify the matching manual firmware package from the latest GitHub Release. / 将 T-Echo-Lite-KeyShield 目标加入项目站设备列表，使预发布用户能从最新 GitHub Release 中识别匹配的手动刷写固件包。\n\n### Fixed / 修复\n- Fixed the T-LoRa Pager LR1121 MeshCore discovery/contact path from `459e8f52`, aligning MeshCore path descriptor handling and Android app contact/adverts projection with the shared protocol rules. / 修复 `459e8f52` 中 T-LoRa Pager LR1121 MeshCore 发现/联系人路径，统一 MeshCore path descriptor 处理，并让 Android app 联系人/advert 投影遵循共享协议规则。\r\n- Stabilized nRF52 local persistence for the pre-release by limiting node storage pressure, recovering UI settings writes when volatile cache files fill LittleFS, and adding a Settings action that clears local node/contact/message cache while preserving device and radio settings. / 为本次预发布稳定 nRF52 本地持久化：限制节点存储压力，在易失缓存文件占满 LittleFS 时恢复 UI 设置写入，并新增 Settings 动作，在保留设备与无线设置的同时清理本地节点、联系人和消息缓存。\n- Tightened the nRF52 Meshtastic BLE path for iOS by aligning fromRadio notification timing, restart state, and stale-consume recovery with the app protocol sequence. / 收紧 nRF52 Meshtastic BLE 的 iOS 路径，使 fromRadio 通知时序、重启状态和陈旧消费恢复与 App 协议时序对齐。\n\n\n\n## What's Changed\n* fix gpx track crash by @vicliu624 in https://github.com/vicliu624/trail-mate/pull/65\n* Fix pager lr1121 by @vicliu624 in https://github.com/vicliu624/trail-mate/pull/66\n* Prepare nRF52 BLE and UF2 prerelease by @vicliu624 in https://github.com/vicliu624/trail-mate/pull/67\n\n\n**Full Changelog**: https://github.com/vicliu624/trail-mate/compare/v0.1.30-alpha...v0.1.32-alpha"
-  - version: v0.1.31-alpha
-    name: v0.1.31-alpha
-    datetime: '2026-06-26T19:05:53Z'
-    url: https://github.com/vicliu624/trail-mate/releases/tag/v0.1.31-alpha
-    prerelease: true
-    notes: "## [0.1.31-alpha] - 2026-06-27\n### Fixed / 修复\n- Fixed [#64](https://github.com/vicliu624/trail-mate/issues/64) and [#41](https://github.com/vicliu624/trail-mate/issues/41). / 修复 [#64](https://github.com/vicliu624/trail-mate/issues/64) 和 [#41](https://github.com/vicliu624/trail-mate/issues/41)。\r\n\r\n\n\n**Full Changelog**: https://github.com/vicliu624/trail-mate/compare/v0.1.30-alpha...v0.1.31-alpha"

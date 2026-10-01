@@ -1,7 +1,125 @@
 source: github
 repo: Yeraze/meshmonitor
-updatedAt: '2026-09-29T22:00:50.699Z'
+updatedAt: '2026-10-01T01:13:40.411Z'
 releases:
+  - version: v4.17.0-rc1
+    name: v4.17.0-rc1
+    datetime: '2026-09-30T23:05:41Z'
+    url: https://github.com/Yeraze/meshmonitor/releases/tag/v4.17.0-rc1
+    prerelease: true
+    notes: >-
+      # MeshMonitor v4.17.0-rc1
+
+
+      > ⚠️ **Pre-release.** This is a release candidate for testing. It does not move the `:latest`
+      Docker tags.
+
+
+      4.17.0-rc1 is the first candidate for the 4.17 line. It adds **ack proof** ("Proven receipt")
+      in Delivery Details and **AEAD channel support, Phase 1**, both built on a protobufs bump to
+      Meshtastic's untagged `master` ahead of firmware 2.8.1. The Automation Engine can now
+      **broadcast waypoints**, and every waypoint gets an optional hop limit. MeshCore gains **Trace
+      Path auto return**, the **Pin sidebar** control Meshtastic already had, and a **map glyph of
+      its own for Repeaters**, so they stop looking identical to Meshtastic ROUTERs on the Unified
+      map. Web Push subscribe and unsubscribe are now **per source**. Slow API requests now get a
+      `504 REQUEST_TIMEOUT` reply instead of a dropped socket, which ends browsers silently
+      resending them (one Trace Path click used to put a trace on air every 30 s). Waypoints and
+      data requests now use the node's configured hop limit. Migrations 183–185 run on first boot.
+
+
+      ## Upgrade notes
+
+      - **Hop limits:** waypoint sends (fixed 3), position, NodeInfo and telemetry requests (3) and
+      NeighborInfo requests (7) now all use the node's configured LoRa hop limit. On a node set
+      above 3 these reach further; NeighborInfo requests stop flooding to 7 hops.
+
+      - **API clients:** a request still running at 30 s now gets `504 REQUEST_TIMEOUT` ("may still
+      complete in the background; check before retrying") instead of a closed socket. Known-slow
+      routes get a longer timeout.
+
+      - **Protobufs** now track Meshtastic's untagged `master` (`2542e06`).
+
+      - **Migrations 183–185** run automatically (waypoint hop limit + automation key,
+      `messages.ackProofStatus`, `channels.useAead`).
+
+      - Ack proof and AEAD only light up with firmware 2.8.1, which has no release yet.
+
+
+      ## What's Changed
+
+
+      ### Features
+
+      - feat(delivery): show Meshtastic ack proof "Proven receipt" (#5279) #5489
+
+      - feat(channels): store and preserve ChannelSettings.use_aead (#5248 Phase 1) #5492
+
+      - feat(automation): broadcast waypoints with a hop limit (#5482) #5484
+
+      - feat(meshcore): auto return path for Trace Path (#5485) #5490
+
+      - feat(nav): Pin sidebar on MeshCore sources, shared with Meshtastic (#5481) #5483
+
+      - feat(map): give MeshCore Repeaters their own glyph, apart from Meshtastic routers (#5491)
+      #5501
+
+
+      ### Bug Fixes
+
+      - fix(http): stop browsers resending slow requests (RF re-transmits every 30 s) #5494
+
+      - fix(push): scope Web Push subscribe state and unsubscribe to the source (#5493) #5495
+
+      - fix(meshcore): show a repeater's TX power, position and preset (#5496) #5497
+
+      - fix(telemetry): keep the time range selector when the window is empty (#5498) #5499
+
+      - fix(meshtastic): send data requests at the node's configured hop limit #5488
+
+
+      ### Dependencies / Maintenance
+
+      - chore(protobufs): bump to master 2542e06, and plan AEAD channels (#5248) and ack proof
+      (#5279) #5486
+
+      - chore(release): bump to 4.17.0-rc1, and write its changelog section #5504
+
+
+      ## Issues Resolved
+
+      - #5279 [Track] Firmware #11877: Routing.ack_proof HMAC-verified explicit acks for PKI DMs
+
+      - #5481 [FEAT] Add Pin sidebar control to MeshCore main nav (parity with Meshtastic sidebar)
+
+      - #5482 [FEAT] Automation Engine action to broadcast waypoints with configurable hop limit
+
+      - #5485 [FEAT] MeshCore Trace Path: mirror outbound as return leg to match MeshCore One's Auto
+      Return Path
+
+      - #5491 [FEAT] Distinguish Meshtastic ROUTER from MeshCore Repeater on the Unified map
+
+      - #5493 [BUG] Web Push subscription state leaks across sources (subscribe indicator +
+      unsubscribe delete)
+
+      - #5496 MeshCore repeater Configuration page shows defaults for TX power / preset /
+      coordinates
+
+      - #5498 [BUG] MeshCore telemetry duration selector hidden when current window has no data
+
+
+      Partially addressed: #5248 (AEAD channels): Phase 1 ships here; Phase 2 waits for a firmware
+      2.8.1 build.
+
+
+      **Full Changelog**: https://github.com/Yeraze/meshmonitor/compare/v4.16.2...v4.17.0-rc1
+
+
+      ## 🚀 MeshMonitor v4.17.0-rc1
+
+
+      ### 📦 Installa
+
+      …
   - version: v4.16.2
     name: v4.16.2
     datetime: '2026-09-29T20:40:37Z'
@@ -2098,83 +2216,5 @@ releases:
       - #5060 MapSidebar full-screen sheet never applies in landscape
 
       - #5062 MeshBeacon `broadc
-
-      …
-  - version: v4.16.0-rc2
-    name: v4.16.0-rc2
-    datetime: '2026-09-03T16:50:44Z'
-    url: https://github.com/Yeraze/meshmonitor/releases/tag/v4.16.0-rc2
-    prerelease: true
-    notes: >-
-      # MeshMonitor v4.16.0-rc2
-
-
-      > ⚠️ **Release candidate — not a stable release.** Please test and report issues before 4.16.0
-      ships.
-
-
-      Second release candidate for 4.16.0. The headline is the **MeshMapper Observer** integration
-      landing in full: any MeshCore source can now publish coverage data to MeshMapper (or LetsMesh)
-      with a one-click preset and no extra hardware, because the Analyzer Observer can finally talk
-      to more than one broker at a time. Alongside that, this RC is mostly a fixes release for
-      problems that were misreporting reality — a Packet Monitor showing firmware 2.8's NodeDB
-      replays as if they were live receptions, Position Config claiming GPS was enabled when the
-      device had it disabled, and MeshBeacon broadcast targets that looked like they weren't saving
-      when in fact only the read-back was broken.
-
-
-      It also carries **one schema migration** (157) and one behaviour change worth knowing about
-      before you upgrade: a MeshCore room server with a saved password that no longer works will now
-      switch its own auto-sync off instead of retrying forever. See Upgrade Notes.
-
-
-      ## Features
-
-
-      - **#5022 + #5027** — **MeshMapper Observer** (#5014), in two phases. Phase 1 extends the
-      Analyzer Observer from one broker to N, with per-broker connection state, counters,
-      credentials and tokens; MeshMapper's MQTT ingestion already speaks the exact wire contract our
-      observer does, so contributing needed only multi-broker publishing. Phase 2 turns the fieldset
-      into a broker-list editor with verified one-click presets (MeshMapper, LetsMesh US/EU,
-      Custom), a per-broker status panel on the MeshCore Configuration view, and an `OBS c/N` badge
-      on the Dashboard source card. Legacy single-broker configs keep working and are migrated to
-      `brokers[0]` on first save — no DB migration, the observer config is a JSON blob.
-
-      - **#5026** — Duplicate button on automation rules (#5024).
-
-      - **#5021** — Save Security Config is re-enabled for remote nodes (#4736). The button had been
-      hard-disabled since #1602 behind a tooltip blaming "a firmware compatibility issue"; reading
-      `AdminModule.cpp` showed that premise — and a comment in our own code repeating it — was
-      wrong.
-
-
-      ## Bug Fixes
-
-
-      - **#5038** — Packet Monitor no longer shows firmware 2.8's NodeDB replays as live receptions
-      (#5034). Firmware 2.8 periodically re-delivers each NodeDB entry's cached position/telemetry
-      to the connected client, synthesizing POSITION_APP/TELEMETRY_APP packets from stored data.
-      Firmware PR #11014 stabilized the packet id and hop fields across replays (hence "same packet
-      id, different time"), and `transport_mechanism` is deliberately forced to `TRANSPORT_LORA` for
-      iOS compatibility, so a client could not tell them apart. This is the Packet Monitor face of
-      #4192.
-
-      - **#5037** — MeshCore: a refused room-server password is no longer retried every 60 seconds
-      forever, and can now be removed (#5036). Adds **migration 157**. The room-sync scheduler
-      stamped its clock only after a *successful* login, so a room with a stale password stayed
-      permanently overdue and was re-picked on every tick — on the order of 180 login floods an
-      hour, indefinitely, plus a matching stream of rejected logins in the room operator's own logs.
-      Every attempt now advances the clock; a refusal disables auto-sync at once and three
-      unanswered attempts do the same. A new **"Forget saved password"** button sits on the room
-      *login* card, reachable precisely when a bad password has locked you out — previously the only
-      control that could stop the retries was behind the login itself.
-
-      - **#5035** — MeshBeacon broadcast-target region and preset now persist across a save and
-      reboot (#5030). The device stored them correctly all along; MeshMonitor could not read them
-      back. `broadcast_targets` is the only *repeated message* field `/api/config/current` returns,
-      so its entries stayed protobufjs `Message` instances and were serialized through protobufjs's
-      own `toJSON()`, which emits enum **names** rather than numbers.
-
-      - **#5029** — Position Config 
 
       …
