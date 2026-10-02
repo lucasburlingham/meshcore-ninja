@@ -1,7 +1,26 @@
 source: github
 repo: MarekWo/mc-webui
-updatedAt: '2026-09-12T16:49:23.277Z'
+updatedAt: '2026-10-02T23:36:49.642Z'
 releases:
+  - version: v2.18.3
+    name: mc-webui 2.18.3
+    datetime: '2026-10-02T19:08:25Z'
+    url: https://github.com/MarekWo/mc-webui/releases/tag/v2.18.3
+    prerelease: false
+    notes: >-
+      ### Fixes
+
+
+      - **Maps no longer turn into "403 Access blocked" tiles behind a reverse proxy with a strict
+      referrer policy.** OpenStreetMap refuses map images to requests that do not say which site
+      they come from. Some reverse proxies (Traefik, Nginx or Cloudflare with a "security headers"
+      preset) tell the browser to withhold exactly that, and every map in the app then showed
+      *Access blocked — App is not following the tile usage policy* instead of the map — typically
+      on one device only, while the same installation worked on another. The app now asks for the
+      referrer on map images explicitly, which takes precedence over the proxy's setting. A browser
+      extension or antivirus that strips the referrer still cannot be overridden from the page;
+      [Troubleshooting](troubleshooting.md#map-shows-403-access-blocked-instead-of-the-map) explains
+      how to tell the two apart.
   - version: v2.18.2
     name: mc-webui 2.18.2
     datetime: '2026-09-12T16:20:29Z'
@@ -884,24 +903,3 @@ releases:
       "Connecting…", while the device was connected the whole time. Those requests are now bundled
       into one. A page that needed hundreds of requests per update now needs a single one. The
       remaining reason several windows were slow is fixed separately — see the first entry above.
-  - version: v2.4.0
-    name: mc-webui 2.4.0
-    datetime: '2026-07-29T19:16:54Z'
-    url: https://github.com/MarekWo/mc-webui/releases/tag/v2.4.0
-    prerelease: false
-    notes: >-
-      ### New features
-
-
-      - **The Android app can send notifications now.** When the app shipped in 2.3.0, notifications
-      were the one thing it couldn't do, and the advice was to keep a Chrome "Add to Home Screen"
-      install alongside it. That's no longer necessary — turn notifications on in the mc-webui menu
-      as usual, allow the permission Android asks for, and new messages and pending contacts arrive
-      as ordinary Android notifications. Tapping one reopens the app. Two things are actually better
-      here than in the browser: they work over plain `http://` too (Chrome refuses notifications on
-      an unencrypted page), and the app shows up in Android's notification settings like any other,
-      so you can silence it or change its sound there. The same limit as the browser still applies:
-      notifications arrive while the app is open or recently in the background, and stop once
-      Android suspends it — reopening the app catches you up. Requires app version **1.1**; see the
-      [Android App guide](https://github.com/MarekWo/mc-webui/blob/main/docs/android-app.md) for how
-      to update.
