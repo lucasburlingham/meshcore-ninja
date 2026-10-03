@@ -1,7 +1,121 @@
 source: github
 repo: MeshCore-Beacon/beacon-server
-updatedAt: '2026-08-17T16:30:15.721Z'
+updatedAt: '2026-10-03T04:22:44.158Z'
 releases:
+  - version: v2.0.0
+    name: v2.0.0
+    datetime: '2026-10-03T02:55:50Z'
+    url: https://github.com/MeshCore-Beacon/beacon-server/releases/tag/v2.0.0
+    prerelease: false
+    notes: >-
+      # Beacon Server 2.0.0
+
+
+      A huge thank you to [n30nex](https://github.com/n30nex) for helping get Beacon to this point.
+      Many of the dashboards and features in 2.0.0, from observer monitoring and the analytics
+      endpoints to channel scopes and the MeshMapper work, are there because of his help.
+
+
+      Pair this release with [Beacon Web
+      2.0.0](https://github.com/MeshCore-Beacon/beacon-web/releases/tag/v2.0.0).
+
+
+      ## Breaking change: 2.0.0 needs a fresh database
+
+
+      There were so many changes to the backend database over this cycle that it made sense to start
+      clean. 2.0.0 starts from a new schema baseline and will not run against a 1.x database. It
+      refuses to start with:
+
+
+      ```
+
+      migrations failed error="database schema predates Beacon 2.0.0; 2.0.0 needs a fresh database"
+
+      ```
+
+
+      1.x history does not carry over. The database user and database name also change from `tower`
+      to `beacon`, and several config settings that used to be tolerated now stop startup. Follow
+      the [upgrade
+      guide](https://github.com/MeshCore-Beacon/beacon-docs/blob/main/docs/upgrading.md#upgrading-to-200-from-1x)
+      step by step before you pull the new image.
+
+
+      ## Built for big instances
+
+
+      A lot of this release is about load. MeshMapper's instance at
+      [analyzer.meshmapper.net](https://analyzer.meshmapper.net/) handles around 400,000 packets
+      every 15 minutes on 2.0.0 and barely sweats. MQTT bursts are buffered into bounded
+      per-observer workers, route reconfirmation runs in batches that no longer stall ingest,
+      retention deletes are batched with tuned autovacuum, and every historical stat now reads from
+      hourly rollups instead of materialized views or live scans.
+
+
+      ## MeshMapper integration
+
+
+      MeshMapper has expanded its API and Beacon now ingests it. With the `meshmapper` config block
+      turned on, Beacon can:
+
+
+      - Tag scoped traffic using the transport scope catalogue MeshMapper publishes for each IATA.
+
+      - Set up regions automatically from MeshMapper zone groups, so you do not have to hand-write
+      `regions:`.
+
+      - Draw geo borders from MeshMapper zone outlines, used for the map border layer and the
+      foreign repeater flag.
+
+      - Import each IATA's public hashtag channels and decrypt them like configured ones.
+
+
+      Everything is off by default, needs no API key, and respects MeshMapper's per-endpoint rate
+      limits. Details are in the [configuration
+      guide](https://github.com/MeshCore-Beacon/beacon-docs/blob/main/docs/configuration.md).
+
+
+      ## Versioning from here on
+
+
+      Starting with 2.0.0, Beacon Server and Beacon Web share the same major and minor version. Only
+      the patch number moves on its own, so server 2.0.3 runs with web 2.0.1. Keep both on the same
+      `2.X`. The `latest` image tag is now reserved for stable releases from `main`; pin `:2.0` on
+      both images if you want to choose when to move to the next minor.
+
+
+      ## Everything since v1.6.0
+
+
+      ## Breaking changes and configuration
+
+
+      - Fresh database required. All 1.x migrations are flattened into a single 2.0.0 baseline, and
+      migrations now run under an advisory lock inside a transaction so a crash mid-migration cannot
+      strand a database.
+
+      - The 1.6.0 materialized views are gone. Historical stats read hourly rollup tables instead
+      (see Stats and analytics).
+
+      - `packets.retention` now defaults to 7 days (down from 30) and also covers observations and
+      channel messages. Hourly stats outlive raw packets under `analytics.rollup_retention`, default
+      90 days.
+
+      - Every manual `scopes:` entry must set `region:` to one of your `regions:` slugs. A missing
+      or unknown region stops startup.
+
+      - REST rate limiting is on by default: 300 requests per minute per client IP on `/api/v1/*`,
+      answered with 429 and `Retry-After`. Behind a proxy, set `server.trusted_proxies` (CIDRs only)
+      and have the proxy send `X-Real-IP`, or all visitors share one budget.
+
+      - WebSocket upgrades are limited to `websocket.max_connects_per_minute` (default 10) per
+      client IP, and only the page's own host may open `/ws` unless other origins are listed in
+      `websocket.allowed_origins`.
+
+      - Admin endpoints under `/api/v1/admin/` need `BEACON
+
+      …
   - version: v1.6.0
     name: v1.6.0
     datetime: '2026-07-24T20:37:44Z'
