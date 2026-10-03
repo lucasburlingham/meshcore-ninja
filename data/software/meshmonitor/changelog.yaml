@@ -1,7 +1,125 @@
 source: github
 repo: Yeraze/meshmonitor
-updatedAt: '2026-10-02T23:37:01.808Z'
+updatedAt: '2026-10-03T22:45:08.014Z'
 releases:
+  - version: v4.17.0-rc3
+    name: v4.17.0-rc3
+    datetime: '2026-10-03T20:08:40Z'
+    url: https://github.com/Yeraze/meshmonitor/releases/tag/v4.17.0-rc3
+    prerelease: true
+    notes: >-
+      # MeshMonitor v4.17.0-rc3
+
+
+      > [!WARNING]
+
+      > This is a **pre-release** for testing. It is not tagged `latest`. Use it on a test install
+      or with a recent backup.
+
+
+      ## Summary
+
+
+      This release candidate adds cross-source correlation: when one of your radios is heard by
+      another of your sources, MeshMonitor now says so. The Unified Packet Monitor tags those
+      packets and can filter on them, the Coverage Report marks fixes sent by your own sources, and
+      both maps gain an opt-in **Show Cross-Source Links** layer. MeshCore repeaters attached over
+      serial now turn the adverts they hear into Nodes and decrypt channel messages with keys you
+      already hold; a message is shown only to users who can read a channel with that key. The
+      Channel Database stores MeshCore channel secrets next to Meshtastic keys, with a one-time
+      import from a MeshCore device. Message Forwarding gets a per-source master switch, a **FWD**
+      pill on the source card, and an automation action. A new **Live Mesh Activity** dashboard
+      widget lists the remote nodes a source heard in the last few minutes.
+
+
+      LoRa modem presets are corrected and extended: LONG_TURBO shows CR 4/8, the TINY presets and
+      new regions are listed, firmware 2.8 per-region preset rules are enforced, and a LongModTurbo
+      recipe is offered for custom settings. Fixes cover appearance settings changing on their own,
+      CARTO keys on report maps, the map repeating the world when zoomed out, 3-byte MeshCore Define
+      Path, and coverage survey conflicts.
+
+
+      ## Features
+
+      - Cross-source correlation: Unified Packet Monitor tags and filter, Coverage Report flags
+      (#5573)
+
+      - Map: cross-source "heard here" links layer on both maps (#5575)
+
+      - MeshCore: repeater RAW ingest — adverts to Nodes, channel messages to gated Messages (#5574)
+
+      - MeshCore: virtual channels in the Channel Database, with import from a device (#5576)
+
+      - Forwarding: source-level master switch, sidebar FWD pill, automation action (#5572)
+
+      - Dashboard: Live Mesh Activity widget (#5570)
+
+
+      ## Bug Fixes
+
+      - LoRa: correct modem preset tables, add TINY presets, firmware 2.8 region rules, LongModTurbo
+      recipe (#5571)
+
+      - Settings: appearance and UI preferences are global-only (#5569)
+
+      - MeshCore: 3-byte Define Path, shared telemetry labels, local-node favorites (#5566)
+
+      - Map: CARTO key on report maps, one-world clamp, coverage overlap chooser (#5565)
+
+      - Coverage: select the blocking live survey on `SURVEY_ALREADY_LIVE` (#5562)
+
+
+      ## Issues Resolved
+
+      #5537, #5543, #5544, #5546, #5547, #5548, #5549, #5550, #5551, #5552, #5553, #5554, #5555,
+      #5556, #5557, #5558, #5559, #5560, #5561
+
+
+      ## Upgrade Notes
+
+      - Migrations 189–193 run on first start. 189 removes per-source copies of appearance and UI
+      preferences; if a source held a value that differed from the global one, the promotion rule in
+      #5569 decides which is kept.
+
+      - Cross-source map links start filling after the upgrade; there is no backfill.
+
+      - New MeshCore entries in the Channel Database start with no user access. Grant it under
+      Users.
+
+
+      **Full changelog:** https://github.com/Yeraze/meshmonitor/compare/v4.17.0-rc2...v4.17.0-rc3
+
+
+      ## 🚀 MeshMonitor v4.17.0-rc3
+
+
+      ### 📦 Installation
+
+
+      **Docker (recommended):**
+
+      ```bash
+
+      docker run -d \
+        --name meshmonitor \
+        -p 8080:3001 \
+        -v meshmonitor-data:/data \
+        ghcr.io/Yeraze/meshmonitor:4.17.0-rc3
+      ```
+
+
+      ### 🧪 Testing
+
+      ✅ All tests passed
+
+      ✅ TypeScript checks passed
+
+      ✅ Docker images built for linux/amd64, linux/arm64, linux/arm/v7
+
+
+      ### 📋 Changes
+
+      See commit history for detailed changes.
   - version: v4.17.0-rc2
     name: v4.17.0-rc2
     datetime: '2026-10-02T21:32:28Z'
@@ -2142,123 +2260,5 @@ releases:
       **#5122** (repeated disconnects during initial config sync on a large mesh) is **not**
       resolved by this release. #5130 removes a latent bug that matches the reported fingerprint — a
       connect timeout that could outlive its own attempt and des
-
-      …
-  - version: v4.16.0-rc4
-    name: v4.16.0-rc4
-    datetime: '2026-09-06T16:03:00Z'
-    url: https://github.com/Yeraze/meshmonitor/releases/tag/v4.16.0-rc4
-    prerelease: true
-    notes: >-
-      # MeshMonitor v4.16.0-rc4
-
-
-      > **Pre-release.** A release candidate for 4.16.0. Not tagged `latest`, and no `:latest`
-      Docker tags. Please report anything odd.
-
-
-      This RC is mostly repair work, and three of the fixes were quietly destroying or wasting
-      things rather than merely looking wrong. The telemetry retention purge read two **per-source**
-      settings with their un-namespaced keys, found nothing on every 4.x install, and fell through
-      to the ordinary seven-day cutoff — so it had been deleting favourited nodes' history hourly,
-      which is precisely the history that setting exists to protect. Reset Traceroutes tripped a
-      source-scope guard and showed an error, but only after its unguarded sibling had already wiped
-      every source's traceroutes; the same defect meant a global node purge wiped them silently,
-      with no error at all. And a single dropped MQTT connection could start a reconnect loop that
-      outlived the original fault, rebuilding sockets against a third-party broker indefinitely —
-      measured at 216 rebuilds in ten minutes where there should have been one.
-
-
-      The rest is the mobile-landscape family. Five separately reported bugs shared one cause:
-      mobile CSS gated on `max-width` alone silently switches off when a phone rotates, because a
-      landscape phone is *wider* than the 768px breakpoint. That single mistake was hiding the
-      Sources drawer's close control, collapsing the bottom nav to a 48px stub with two tabs
-      unreachable, leaving the map frozen at the wrong size until reload, stranding the map sidebar
-      as a cramped floating panel, and giving the Device config form a 94px strip to render in. Also
-      fixed: the Network Survey panel had never requested its own endpoint correctly, Remote Admin's
-      Save Security Config button could never enable, and channel/room names were near-invisible in
-      High Contrast Dark.
-
-
-      ## Bug Fixes
-
-
-      - Telemetry retention purge read favourites from the wrong settings namespace (#5082)
-
-      - Scope traceroute purges, and guard the sibling that never did (#5089)
-
-      - Stop the upstream MQTT broker connection storm (#5081)
-
-      - Request the network survey under `/api` so it reaches the API router (#5086)
-
-      - Stamp the security load gate from the per-section load too (#5091)
-
-      - Offset content by the header's real height, not a constant (#5075)
-
-      - Give the Device config form the screen in landscape (#5073)
-
-      - Re-flow the map on landscape rotation and back (#5057)
-
-      - Give MapSidebar a real landscape treatment (#5067)
-
-      - Unbury the Sources drawer close control and the header chrome (#5058)
-
-      - Stop a long source name from running into the connection dot (#5074)
-
-      - Scope the non-scrollable-page rule to the channels tab (#5084)
-
-      - Use theme text color for channel/room row buttons (#5072)
-
-
-      ## Features
-
-
-      - MeshCore observer device stats from the `/status` topic, Phase 5 (#5076)
-
-      - MeshCore shared read surfaces see an MQTT ingest source, Phase 5.5 (#5083)
-
-      - Persist MeshCore observer noise floor as telemetry (#5090)
-
-
-      ## Documentation
-
-
-      - Document the MeshCore MQTT ingest source (#5085)
-
-
-      ## Issues Resolved
-
-
-      - #5051 Animated connection badge overflows/clips Sources button
-
-      - #5052 Map zoom control renders above Sources sidebar
-
-      - #5053 Mobile landscape: cannot close Sources menu
-
-      - #5054 Map and bottom nav break on landscape rotation
-
-      - #5069 Device config category picker eats most of the usable space
-
-      - #5070 Info page heading clipped behind fixed top bar
-
-      - #5071 Channel/room name text colour accessibility
-
-      - #5077 Save Security Config never enables after loading
-
-      - #5078 Network Survey fails with "Could not build the survey"
-
-      - #5079 MQTT connection storm floods logs
-
-      - #5080 Telemetry Dashboard shows only ~7 days for favourited nodes
-
-      - #5088 Reset Traceroutes throws from the per-source Danger Zone
-
-
-      ## Upgrade Notes
-
-
-      **Two fixes stop ongoing data loss but cannot undo it.** Telemetry history already purged by
-      the favourites bug (#5080), and traceroute history already wiped by either path in #5088, are
-      unrecoverable. After upgrading, retention is honoured going forward — a 
 
       …
