@@ -1,29 +1,206 @@
 source: github
 repo: ALLFATHER-BV/wadamesh
-updatedAt: '2026-09-23T13:26:34.042Z'
+updatedAt: '2026-10-03T19:05:23.844Z'
 releases:
-  - version: beta_85
-    name: wadamesh beta_85
-    datetime: '2026-09-23T12:16:21Z'
-    url: https://github.com/ALLFATHER-BV/wadamesh/releases/tag/beta_85
+  - version: beta_87
+    name: wadamesh beta_87
+    datetime: '2026-10-03T18:04:57Z'
+    url: https://github.com/ALLFATHER-BV/wadamesh/releases/tag/beta_87
     prerelease: true
     notes: >-
-      Test build. Stable is **beta_83**.
+      Test build. Stable is **beta_85**.
 
 
       Flash it at **[flasher.wadamesh.com](https://flasher.wadamesh.com)** (switch the toggle to
       Beta), or update on the device if you have "Get test builds (beta)" turned on.
 
 
+      Two fixes for Lua apps and nothing else. **If you do not write or run apps, this is the same
+      firmware as beta_86** and there is no reason to rush.
+
+
+      ## A memory leak in Lua apps
+
+
+      Apps leaked memory every time they redrew a screen, and the more the screen had on it the
+      faster it went.
+
+
+      Clearing a page destroyed the buttons and list rows but kept the code attached to each one.
+      The callbacks live in a table keyed by the widget's address, and nothing removed the entries
+      when the widgets were freed, so an app rebuilding a list of twenty contacts left twenty
+      closures behind on every redraw, each holding whatever it had captured. Nothing ever took them
+      out, so an app ran until it could not allocate and then failed to build a screen.
+
+
+      Clearing a page now releases those callbacks along with the widgets they belong to. Every
+      entry in that table describes a widget that has just been destroyed, so there is nothing in it
+      worth keeping.
+
+
+      It could also have made a button do the wrong thing. Addresses get reused, so a new button
+      created with nothing attached to it could land on an address a dead one had left behind and
+      run that instead on the next tap. That cannot happen now that nothing is left behind.
+
+
+      Reported by Jade while writing a one-time-pad app. If you have seen an app get slower, or
+      start failing to draw, the longer it ran, this is why.
+
+
+      ## wada.ui.emoji(cb)
+
+
+      Opens the emoji picker and gives you the chosen glyph back as UTF-8, or `nil` if it was
+      dismissed.
+
+
+      This is for an app that draws its own text entry and keeps the buffer itself. If you use
+      `wada.ui.input()` you do not need it: beta_86 put the picker on that field's long-press menu
+      already, beside Cut, Copy, Paste and Sym. The distinction matters because an app with its own
+      composer has no textarea to long-press, which is exactly the case this was asked for.
+
+
+      Documented at [wadamesh.com/sdk.html](https://wadamesh.com/sdk.html).
+  - version: beta_86
+    name: wadamesh beta_86
+    datetime: '2026-10-03T17:11:27Z'
+    url: https://github.com/ALLFATHER-BV/wadamesh/releases/tag/beta_86
+    prerelease: true
+    notes: >-
+      Test build. Stable is now **beta_85**.
+
+
+      Flash it at **[flasher.wadamesh.com](https://flasher.wadamesh.com)** (switch the toggle to
+      Beta), or update on the device if you have "Get test builds (beta)" turned on.
+
+
+      Most of this is [@oumike](https://github.com/oumike)'s: a 50-commit set covering the T-Display
+      P4, the T-Deck Pro, the M9 and the shared UI, plus a new board. The five new Store apps are
+      [@samuelcoustet](https://github.com/samuelcoustet)'s, and the trackball fix is
+      [@samdems](https://github.com/samdems)'.
+
+
+      ## If you have a T-Display P4, this is the one to take
+
+
+      **Landscape works.** In beta_85 switching to landscape left the touch screen rotated and
+      offset, which meant the control to switch back could not be hit and the only way out was
+      reflashing over USB. Taps were being rotated twice, once by the touch driver and once by the
+      interface. If beta_85 left you stuck in landscape, this build is the way out.
+
+
+      The P4 also gains the **LR2021 radio variants** (#504), a clip-on keyboard, GPS that starts
+      reliably, Wi-Fi through the C6 coprocessor, and a clock that syncs over saved Wi-Fi on a cold
+      boot. Several screens that were cut off or overlapping in portrait are laid out properly, and
+      the Remote UI placeholder is drawn on the real panel.
+
+
+      ## A new board: Elecrow CrowPanel Advance 3.5"
+
+
+      ESP32-S3, ILI9488 display, GT911 touch (#561). Experimental, and new enough that anything you
+      report is useful.
+
+
+      ## T-Deck Pro owners: pick your hardware revision
+
+
+      There are now separate **v1.0** and **v1.1** builds. The touchscreen that did nothing on some
+      Pros was simply the wrong touch driver for that revision (#568). If you do not know which you
+      have, try v1.1: it is what the single Pro build always was, and updating from the device keeps
+      working without you choosing anything.
+
+
+      ## Fixes
+
+
+      - **#562** the terminal on the Pro and Max drew black text on a black background.
+
+      - **#563** compact chat messages ran into each other on the Pro and Max. The gap added in
+      beta_85 was measured in one place and drawn in another.
+
+      - **#132** the screen lock now holds the trackball as well as touch, so the map no longer pans
+      under a locked screen.
+
+      - **#574** a crash when tapping the accent popup after its text box had closed.
+
+      - **#570** leaving a profile field you did not edit no longer claims it saved, and scrolling
+      no longer says "saved" on every row.
+
+      - **#564** M9 back button. **#569** mark all chats and channels read. **#576** the map's side
+      buttons show which is selected. **#571** Wardrive naming. **#579** the lock screen shows the
+      battery, on every panel.
+
+      - Settings backups were exported as **invalid JSON**, so they could not be imported again.
+      They now also carry the screen and app preferences they were missing.
+
+      - ThinkNode M9: the battery percentage no longer overlaps the signal bars at the larger text
+      sizes added in beta_85.
+
+
+      ## Five new apps in the Store, by @samuelcoustet
+
+
+      **Tetris**, **Breakout**, **Trip Odometer**, **Ping** and **ProTreck**. Tetris, Breakout and
+      Ping are built into the boards that cannot reach the Store; Trip Odometer and ProTreck need
+      GPS and sensors, so they stay a download rather than spending flash on boards that cannot use
+      them.
+
+
+      ## Emoji in any text field
+
+
+      Long-press a field and the picker is there beside Cut, Copy, Paste and Sym. That includes the
+      text entry a Lua app opens with `wada.ui.input()`.
+
+
+      ## For people writing Lua apps
+
+
+      Two things that were asked for already existed and are now documented: **`wada.sys.epoch()`
+      and `wada.sys.datetime()`** give you the device clock, and the field `wada.ui.input()` opens
+      is the firmware's own, so it already has Cut, Copy, Paste, Sym and now Emoji on a long press.
+
+
+      The SDK page also had **the wrong path** for side-loading: on a device with an SD card it is
+      `/meshcomod/apps/`, not `/apps/` at the root of the card. Following the old wording silently
+      did nothing, which cost at least one person an evening.
+
+
+      ## For testers
+
+
+      The P4 landscape fix and the CrowPanel 3.5 are what want eyes. When
+
+      …
+  - version: beta_85
+    name: wadamesh beta_85
+    datetime: '2026-09-23T12:16:21Z'
+    url: https://github.com/ALLFATHER-BV/wadamesh/releases/tag/beta_85
+    prerelease: false
+    notes: >-
+      **Stable.** This is the same build as the beta_85 test release, promoted unchanged after
+      testing, and it replaces beta_83 as the recommended version.
+
+
+      Flash it at **[flasher.wadamesh.com](https://flasher.wadamesh.com)**, or update on the device.
+
+
+      ## Read this first if you have a T-Display P4
+
+
+      **Do not switch the screen to landscape on this build.** Landscape arrived in beta_85 and the
+      touch screen comes back rotated and offset, so the control to switch back cannot be hit and
+      the only way out is reflashing over USB. It is fixed in the **beta_86** test build, which is
+      the way out if you have already hit it. Portrait is the default and is unaffected.
+
+
       ## Read this first if you have a T-Deck Max
 
 
-      A Max that updates itself from the device will install **T-Deck Pro firmware**. The Max reuses
-      the Pro's display and touch drivers, and the table that picks the download file matched the
-      Pro first, so the update check found the right release and then fetched the wrong image for
-      it. beta_85 fixes the table, but it is the firmware you are running now that picks the file,
-      so **update to this one over USB from the flasher, not from the device**. Both are ESP32-S3,
-      so nothing stops the wrong image installing.
+      A Max running **beta_84** that updates itself installs **T-Deck Pro firmware**, because it is
+      the firmware you are running that picks which file to download. Update to this one **over
+      USB** from the flasher rather than from the device. From beta_85 onwards it is fixed.
 
 
       ## Tell us whether a build works, from the device
@@ -32,7 +209,7 @@ releases:
       Settings, About now has **Send a test report**. Say whether it works on your board, tick what
       you actually exercised, say how long you have run it, and send. What comes in lands on
       **[wadamesh.com/beta](https://wadamesh.com/beta.html)**, and that is what the next stable
-      release gets promoted on, instead of a build being promoted because nobody complained.
+      release gets promoted on, instead of a build going out because nobody complained.
 
 
       The report carries the board, the version, your ticks and the free memory. No name, no
@@ -49,53 +226,47 @@ releases:
 
       Optional and off by default: **Count this device** lets the update check say which board and
       build it is running, so a board nobody has reported on can be told apart from a board nobody
-      owns. Those need opposite responses and nothing could tell them apart before.
+      owns.
 
 
-      ## Community work, by @oumike
+      ## New board: LilyGo T-Deck Max
 
 
-      Eleven changes in one reviewed set (#550), each tested on his own hardware.
+      Contributed and tested by [@pelgraine](https://github.com/pelgraine). The T-Deck Pro's
+      hardware with the peripheral power rails and resets behind an I/O expander, and a fuel gauge
+      for the battery. The e-paper screen gets its own handling: no fades, no black frame left on
+      the glass when it sleeps, tap to wake, and the keyboard backlight on a both-Shift chord. It
+      starts with Wi-Fi off and Bluetooth on, because both at once leave this board short of memory.
+      Experimental.
 
 
-      - The **screen timeout** is a slider with fixed stops from 30 seconds to an hour, plus Never,
-      instead of a free-text field (#560). **Existing settings move to the nearest stop and the
-      default is now 30 seconds**, so check it if your screen sleeps sooner or later than you
-      expect.
-
-      - The **keyboard backlight** in Auto follows your screen timeout instead of going dark after
-      about three seconds, which was too short to finish typing (#555).
-
-      - **Advert** can be left from the screen on every touch board, not just with a hardware key
-      (#537).
-
-      - **Export and Import** moved out of Profile into Backups, as one Export action with an
-      optional timestamp in the filename. Import finds the backups on internal storage and the card
-      by itself and only asks which one when there is more than one (#558, #559).
-
-      - **ThinkNode M9**: pressing down at the bottom of a conversation reveals the next message
-      instead of stopping (#548), Back stays in the app drawer when the drawer is your home screen
-      (#556), and a page title no longer sits on top of the lock screen (#553).
-
-      - **T-Deck Pro and Max**: the sender and the message no longer overdraw each other, first-run
-      setup can be driven from the keyboard (#532), Commander has two rows of controls, and the lock
-      screen is drawn for the screen it is actually on rather than a landscape bitmap.
+      ## Things you can do now
 
 
-      ## Text size on the ThinkNode M9
+      - **High contrast day and night themes**, for sunlight where the normal palette washes out.
+
+      - **Channel regions can be discovered instead of typed**: the region page scans for repeaters
+      you can hear and lists the regions they allow, and channel scope offers them in a picker.
+
+      - **Text size presets on the ThinkNode M9**, under Settings, Display, UI size. It grows the
+      text and leaves the layout alone, so rows and controls keep their size and nothing becomes
+      unreachable. Your current setting is untouched by the update.
+
+      - **Coordinates in a chat message open on the map**, by
+      [@TerryTel93](https://github.com/TerryTel93). The message menu gains Map, tapping the message
+      does the same, and the spot is marked so you can find it again or remove it.
+
+      - **Czech**, by [@brebtatv](https://github.com/brebtatv).
 
 
-      Settings, Display, UI size, with Normal, Large text and Huge text. It grows the text and
-      leaves the layout alone, so rows, cards and controls keep their size and nothing becomes
-      unreachable, which is how the Heltec V4-R8 does it on the same size panel. Your current
-      setting is untouched by the update.
+      ## Fixes
 
 
-      ## Landscape on the LilyGo T-Display P4
-
-
-      Settings, Display, Orientation, and it restarts to apply. The panel itself cannot rotate, so
-      the interface is 
+      Radio settings save again when the region field holds a name the new rules reject, such as one
+      with capitals: only the region is skipped now, instead of the frequency, bandwidth and power
+      going with it. The Show button on telemetry shows its label in Russian, Ukrainian, Bulgarian,
+      Serbian and Greek instead of empty boxes. Scanning for regions no longer leaves nameless
+      entries in Contacts. The V4-R8 image fits again, having stopped carr
 
       …
   - version: beta_84
@@ -1693,205 +1864,5 @@ releases:
 
 
       Full reference, including the instruction budget and what it costs: [wadames
-
-      …
-  - version: beta_67
-    name: wadamesh beta_67
-    datetime: '2026-08-21T16:20:46Z'
-    url: https://github.com/ALLFATHER-BV/wadamesh/releases/tag/beta_67
-    prerelease: true
-    notes: >-
-      **Test build.** Stable stays
-      [beta_65](https://github.com/ALLFATHER-BV/wadamesh/releases/tag/beta_65).
-
-
-      Flash it at **[flasher.wadamesh.com](https://flasher.wadamesh.com)** with the Beta toggle on,
-      or on-device via **Settings → Firmware** with "Get test builds (beta)" enabled.
-
-
-      ---
-
-
-      ## ⚠️ App developers and testers: this is the build to hammer
-
-
-      The Lua SDK gained the ability to hold a **whole conversation**, and it is the least-proven
-      part of this release. It builds on all ten images and has **not been exercised on hardware** —
-      I would rather say that plainly than have you find out.
-
-
-      ```lua
-
-      wada.mesh.send_dm(to, text)   -- ok, "sent" | "room" | err   (contact NAME, a room is a
-      contact)
-
-      wada.mesh.channels()          -- names of the channels configured on this device
-
-      app.on_message(m)             -- m.kind = "channel" | "dm" | "room"
-
-      wada.crypto.hmac_sha1(k, m)   -- + sha1/sha256/hmac_sha256/hex, on EVERY board
-
-      ```
-
-
-      **What would help most:**
-
-
-      1. **Send a DM from an app** and confirm it lands in that contact's thread on the device, not
-      just on the air. This is the highest-consequence call in the SDK: it writes as you.
-
-      2. **Receive a DM and a room post** with an app open and check `m.kind`. Apps previously only
-      ever got channel messages, because the delivery hook ran before the sender and body were
-      parsed. That is fixed but unverified.
-
-      3. **Toggle the four permissions independently** in Settings → App permissions and confirm one
-      does not clear another.
-
-      4. **Run SDK Test 1.2** from the Store. Its crypto section checks against published RFC 2202 /
-      4231 vectors, so a PASS is real evidence rather than "it returned something", and it times 200
-      HMACs so you can see why this belongs in C.
-
-
-      Permissions went **two → four**: post to channels as me, read channel messages, send private
-      messages as me, read private messages. Posting to a channel you are already in is not the same
-      act as writing to one person as you, and channel traffic is not your private conversations, so
-      each is granted separately.
-
-
-      **Two bugs found while building it.** Granting one permission silently revoked another (the
-      grant wrote the whole permission set rather than the one switch) — invisible with one
-      permission, constant with four. And apps could only ever receive channel messages, never DMs
-      or room posts.
-
-
-      **`wada.crypto`** exists because Tiamat and Jade hit "instruction budget exceeded" doing
-      HMAC-SHA1 in pure Lua for a one-time-password app. That is a legitimate use of 100k VM
-      instructions, not a runaway: SHA-1 is 80 bit operations per block and the interpreter
-      multiplies each one. mbedTLS is already linked, so it is now microseconds. Deliberately
-      available on **every** board, including those without the rest of the extended toolkit, since
-      it only computes over data the app already holds.
-
-
-      Full API at **[wadamesh.com/sdk.html](https://wadamesh.com/sdk.html)**.
-
-
-      ## ThinkNode M9 and Heltec V4-R8: a large audit pass
-
-
-      **@cvhviz**, [#287](https://github.com/ALLFATHER-BV/wadamesh/pull/287), validated on hardware.
-      M9 navigation soft-locks fixed, including a hardware Back key that had stopped working and a
-      permission dialog that could not be answered on a touchless board; "Store data on SD" now
-      honoured, with chat history and the tile cache following it; deep sleep really drops the
-      rails; and terminal, keyboard and update features that had been quietly T-Deck-only were
-      widened.
-
-
-      Spectrum on the M9 now runs to the LR1110's specification: roughly 2× faster per sweep,
-      correct 150–960 MHz clamps, and opening it mid-transmission waits rather than truncating the
-      packet on the air.
-
-
-      V4-R8: chat history and battery log follow SD adoption, the Orientation reboot trap is
-      defused, and a crash when Wi-Fi associated with Bluetooth already on is fixed.
-
-
-      ## T-Display P4
-
-
-      The battery percentage no longer flickers between 0 and the real value. The gauge shares its
-      bus with several other chips, so a lost reading is normal — the code was treating a failed
-      read as a genuine 0%. It now keeps t
-
-      …
-  - version: beta_66
-    name: wadamesh beta_66
-    datetime: '2026-08-19T14:43:00Z'
-    url: https://github.com/ALLFATHER-BV/wadamesh/releases/tag/beta_66
-    prerelease: true
-    notes: >-
-      **Test build.** Stable is now
-      [beta_65](https://github.com/ALLFATHER-BV/wadamesh/releases/tag/beta_65).
-
-
-      Flash it at **[flasher.wadamesh.com](https://flasher.wadamesh.com)** with the Beta toggle on,
-      or on-device via **Settings → Firmware** with "Get test builds (beta)" enabled.
-
-
-      ---
-
-
-      ## T-Display P4: two measured hardware fixes
-
-
-      **The P4 was transmitting at roughly a twentieth of its rated power.** It never exceeded about
-      **+14.1 dBm** however high you set it, and the steps stopped tracking near the top. The SX1262
-      needs ~118 mA to deliver +22 dBm, but its over-current protection was left at the chip default
-      of 60 mA, so the amplifier was current-limited long before reaching the requested power. Every
-      S3 board has always set this; the P4 was the one target that never did. Found by @wb6zsu on an
-      HP E8285A test set, and confirmed independently by @stephen-62
-      ([#283](https://github.com/ALLFATHER-BV/wadamesh/issues/283)).
-
-
-      **The P4 battery percentage now comes from the fuel gauge**, not from terminal voltage. The
-      BQ27220 coulomb-counts against its learned pack profile and knows the real state of charge;
-      voltage is charger-driven, which is why it pinned at 100% the instant USB went in, sat under
-      100% on a rested full pack, and once read 71% on a pack Meck-P4 measured at 11%. Calibrating
-      "this is full" while charging baked that error in permanently. Reported by @D-Melhede and
-      @wb6zsu ([#273](https://github.com/ALLFATHER-BV/wadamesh/issues/273)).
-
-
-      ⚠️ This does **not** cover charging itself or the red/green charge LED — those are the BQ25896
-      charger, which we do not talk to yet. That half of #273 stays open.
-
-
-      ## The map was hiding your newest contacts
-
-
-      The marker array held 32 entries with one reserved for self, so **31 contact dots was the
-      ceiling** — and the loop stopped there silently while the counter in the corner kept counting
-      every positioned contact. Because contacts are appended and the loop walks in order, the dots
-      that never got drawn were always the newest ones.
-
-
-      Ceiling is now **256**, and if it is ever reached the counter says "31 of 45 on map" rather
-      than quietly disagreeing with the screen. **Map options → "Max dots"** (default All) is there
-      for anyone who wants to cap it.
-
-
-      ## A crash on the home screen
-
-
-      From a coredump a user sent in. Boards with the Expansion Kit were reading the BME280 over I2C
-      **on every home-screen refresh, about once a second**, on the UI thread. Adafruit reads it
-      with a repeated start, and if that sequence stalls, Arduino's `TwoWire` is left holding a lock
-      it then tries to release from the wrong task — FreeRTOS asserts and the device reboots. The
-      reading is now cached and refreshed at most every few seconds.
-
-
-      ## Fixes
-
-
-      - **Language pack downloads failed silently** on some devices while apps downloaded fine.
-      Languages need a much larger buffer; if that memory was not available the download just gave
-      up. It now steps down to smaller buffers, and when it does fail it says why. Reported by
-      @AtomAlex12 ([#274](https://github.com/ALLFATHER-BV/wadamesh/issues/274)).
-
-      - **Every screen is fully translated again** — 29 strings added over recent releases had never
-      reached the language files. Reported by @pisti87
-      ([#277](https://github.com/ALLFATHER-BV/wadamesh/issues/277)), who also supplied the Hungarian
-      for the longest of them.
-
-      - A login that gets no reply now tells you if **multi-byte path hashing** is on, since older
-      repeaters silently drop those packets and the failure otherwise looks like nothing happening
-      at all ([#278](https://github.com/ALLFATHER-BV/wadamesh/issues/278),
-      [#280](https://github.com/ALLFATHER-BV/wadamesh/issues/280)).
-
-      - Exit the **Store / Language page with the keyboard** — @oumike,
-      [#282](https://github.com/ALLFATHER-BV/wadamesh/pull/282), reported by @ichliebespam.
-
-      - **Remote Mode** on the T-Lora Pager no longer leaves a black screen with no way out —
-      @oumike, [#275](https://github.com/ALLFATHER-BV/wadamesh/pull/275), reported by @AtomAlex12.
-
-      - **Room login recovery**: a server that
 
       …
