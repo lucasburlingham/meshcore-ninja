@@ -1,7 +1,165 @@
 source: github
 repo: Kpa-clawbot/CoreScope
-updatedAt: '2026-09-26T16:01:22.355Z'
+updatedAt: '2026-10-04T16:42:28.854Z'
 releases:
+  - version: v3.13.1
+    name: v3.13.1
+    datetime: '2026-10-04T16:37:33Z'
+    url: https://github.com/Kpa-clawbot/CoreScope/releases/tag/v3.13.1
+    prerelease: false
+    notes: >-
+      # v3.13.1
+
+
+      1 commit since v3.13.0: 1 fix. A bug fix only, so patch.
+
+
+      ## Read this before upgrading
+
+
+      Nothing changes unasked. The fix only affects instances that have
+
+      `clientRxCoverage` enabled and receive data from CoreDrive RX companions.
+
+
+      What it does not do: node-discover replies received before this release are
+
+      not recovered. `client_rx_observations` keeps no raw bytes, so the responder's
+
+      pubkey is gone. Coverage from discover replies starts at the upgrade.
+
+
+      ## Fixes
+
+
+      - **Node-discover replies count as coverage** (#2111). A CoreDrive RX companion
+        that runs node-discover hears each repeater that answers, at zero hops, and
+        the reply carries the repeater's own pubkey. The ingestor dropped these
+        replies from `client_receptions`, so a companion could log dozens of replies
+        and the coverage page showed nothing for it. Reported by an operator on
+        v3.13.0: 32 discover replies in 16 minutes, 0 coverage rows. On a deployment
+        that has had this fix since August, discover replies are 4,232 of 9,723
+        coverage rows over 7 days (44%). The server now also matches the 8-byte
+        prefix those replies carry, so the rows show up in a node's own coverage.
+
+      ## Issues closed
+
+
+      None. The report came in through Discord, not as a GitHub issue.
+
+
+      ## Contributors
+
+
+      Pull request authors: @efiten (1).
+
+
+      No co-authors other than tooling are credited in the commits.
+
+
+      ## Upgrade notes
+
+
+      No manual migration step, no new table, no configuration key added or changed.
+
+
+
+      ## What's Changed
+
+      * fix(coverage): attribute node-discover replies to the responder by @efiten in
+      https://github.com/Kpa-clawbot/CoreScope/pull/2111
+
+      * docs(release): notes and changelog for v3.13.1 by @efiten in
+      https://github.com/Kpa-clawbot/CoreScope/pull/2112
+
+
+
+      **Full Changelog**: https://github.com/Kpa-clawbot/CoreScope/compare/v3.13.0...v3.13.1
+  - version: v3.13.0
+    name: v3.13.0
+    datetime: '2026-10-04T12:05:18Z'
+    url: https://github.com/Kpa-clawbot/CoreScope/releases/tag/v3.13.0
+    prerelease: false
+    notes: |-
+      # v3.13.0
+
+      16 commits since v3.12.0: 10 fix, 4 test, 2 feat. Two feats, so minor not patch.
+
+      ## Read this before upgrading
+
+      **The first start after this release backfills advert route evidence in the
+      background, and flood counts read low until it finishes.**
+
+      #2088 records, per advert, whether it was seen arriving by flood, by direct with
+      an empty path, or both. New adverts get this at ingest. For the adverts already
+      in your database, the ingestor runs a one-off background job
+      (`advert_route_evidence_v1`) that reads their stored observations. Until it
+      completes, the Analytics advert split and each node's flood-advert count only
+      know the adverts it has reached so far, so they undercount.
+
+      Measured on two instances of the same deployment, both on a 4-core ARM64 host:
+
+      | | observations | database | duration |
+      |---|---|---|---|
+      | live | 16.8M | 10.6 GB | 24m 1s |
+      | staging, sharing the host with live | 16.5M | 10.3 GB | 36m 23s |
+
+      The author measured 5m43s on 11M observations on other hardware, so expect a
+      wide spread.
+
+      Startup does not wait for it, and ingest carries on alongside it: on the live
+      instance the 15 minutes from 13:00, inside the backfill window, stored 2,803
+      observations against 2,605 to 3,194 in the quarter hours before the deploy.
+
+      It runs once per database. Its progress is kept in the database
+      (`advert_evidence_backfill` holds the cursors, `_async_migrations` the status),
+      so a restart resumes rather than repeats it. There is no setting to skip it.
+
+      What it cannot recover: an observation that was overwritten before this release
+      keeps only its last frame, so some old adverts stay unclassified. The Analytics
+      page says so under the chart.
+
+      ## Features
+
+      - **Adverts are split by the route they arrived on** (#2088, closes #2041) -
+        Analytics separates flood adverts from direct adverts with an empty path, and
+        shows adverts seen both ways as mixed. Node flood-advert counts use the same
+        evidence. An empty remaining path is labelled as exactly that: the firmware
+        can forward a direct advert down to an empty path, so it does not prove the
+        advert was sent zero-hop or from nearby. If writing the evidence fails, the
+        error is logged and counted and the observation is still stored.
+      - **Node detail groups recent adverts the same way** (#2085, closes #2073) -
+        both the side pane and the full page group by the server's classification.
+        An advert without evidence goes to "other" rather than being guessed from the
+        first stored frame, which could belong to a different route than later
+        observations of the same advert.
+
+      ## Paths and packets
+
+      - **Path hops are resolved with the observer that heard them** (#2099, closes
+        #2097) - a 1-byte hop prefix matches several repeaters. Resolution now uses the
+        receiving observer's position, and the packets list shows one warning at the
+        start of a path saying how many of its hops have more than one candidate. The
+        detail pane keeps a badge on each such hop, tied to its name.
+      - **The packets table is compact** (#2090) - short columns such as time, size
+        and hop count are sized to their content instead of a share of the screen, a
+        grouped row draws one expand arrow, and a **Full Names** toggle shows observer
+        and hop names unabbreviated.
+      - **Packet links keep the selected observation** (#2093, closes #2091) -
+        changing the type or observer filter no longer drops `?obs=` from the URL.
+
+      ## Interface
+
+      - **Channel state survives a channel-list refresh** (#2096, closes #2095) -
+        unread counts, last-message previews and the channels you added with a key
+        are kept when the region filter or the show-encrypted toggle reloads the list.
+        Before, every unread count reset and an open key-only channel was closed.
+      - **Live accepts node-filter input only once it can process it** (#2103, closes
+        #2094) - typing while the initial node list loaded was silently lost.
+      - **Heard By drops a Region column that was always empty** (#2077, closes
+        #2062) - the endpoint never sent that field.
+      - **Navi
+      …
   - version: v3.12.0
     name: v3.12.0
     datetime: '2026-09-26T10:52:31Z'
@@ -1394,166 +1552,3 @@ releases:
     url: https://github.com/Kpa-clawbot/CoreScope/releases/tag/v3.4.0
     prerelease: false
     notes: "# CoreScope v3.4 Release Notes\r\n\r\n**The neighbor affinity release.** CoreScope now understands how nodes relate to each other — not just that they exist, but how strongly they're connected. This powers smarter hop resolution, richer node detail pages, and a new graph visualization in analytics.\r\n\r\n---\r\n\r\n## 🎯 Features\r\n\r\n### Neighbor Affinity System (7 milestones)\r\nA complete neighbor relationship engine, from backend graph building to frontend visualization:\r\n\r\n- **Affinity graph builder** — computes neighbor relationships and connection strength from packet traffic (#507)\r\n- **Affinity API endpoints** — REST endpoints to query neighbor data (#508)\r\n- **Show Neighbors via affinity API** — the existing Show Neighbors feature now uses real affinity data instead of raw packet heuristics (#512, fixes #484)\r\n- **Affinity-aware hop resolution** — hop resolver uses neighbor affinity to pick better paths (#511)\r\n- **Node detail neighbors section** — dedicated neighbors panel on the node detail page (#510)\r\n- **Affinity debugging tools** — inspect and troubleshoot affinity calculations (#521)\r\n- **Neighbor graph visualization** — interactive neighbor graph in the analytics tab (#513)\r\n\r\n### Customizer v2\r\n- Event-driven state management replaces the old imperative approach — cleaner, more predictable theme/config updates (#503)\r\n\r\n---\r\n\r\n## 🐛 Bug Fixes\r\n\r\n- **Stale parsed cache on observation packets** — observation packets now correctly invalidate the JSON parse cache (#505)\r\n- **Null-guard rAF callbacks** — live page no longer crashes when `requestAnimationFrame` callbacks fire after cleanup (#506)\r\n- **Customizer v2 phantom overrides** — fixed phantom config entries, missing defaults, and stale dark mode state (#520)\r\n- **Neighbor affinity empty results** — fixed pubKey field name mismatch causing empty affinity graphs (#524)\r\n- **Home defaults in server theme** — server-side theme config now includes home page defaults (#526)\r\n- **Neighbor UI crash + dark mode** — fixed Show Neighbors crash and improved dark mode contrast (#527)\r\n- **Home page steps + FAQ** — both steps AND FAQ now render correctly on the home page (#529)\r\n\r\n---\r\n\r\n## ⚡ Performance\r\n\r\n- **Cached JSON.parse for packet data** — packet payloads are parsed once and cached, avoiding redundant `JSON.parse` calls on repeated access (#400)\r\n\r\n---\r\n\r\n## Known Limitations\r\n\r\n- **Affinity graph scales with traffic volume** — networks with very low packet rates may show weak or missing neighbor relationships until enough data accumulates\r\n- **Debugging tools are developer-facing** — the affinity debug panel (#521) is functional but not polished for end-user consumption\r\n- **Customizer v2 migration** — custom themes saved under v1 may need to be re-applied after upgrade"
-  - version: v3.3.0
-    name: CoreScope v3.3.0 — Performance & Polish
-    datetime: '2026-04-02T07:16:23Z'
-    url: https://github.com/Kpa-clawbot/CoreScope/releases/tag/v3.3.0
-    prerelease: false
-    notes: >-
-      # CoreScope v3.3.0 — Performance & Polish
-
-
-      28 changes since v3.2.0. This release is all about making CoreScope faster, more accurate, and
-      harder to break.
-
-
-      ## ⚡ Performance Overhaul
-
-
-      - **Virtual scroll for packets table** — handles 10K+ packets without breaking a sweat (#402)
-
-      - **Observer Map lookups** — O(1) instead of linear scans on every render (#468)
-
-      - **requestAnimationFrame animations** — live page ditches setInterval, no more stacking when
-      tab-switching (#470)
-
-      - **Client-side My Nodes filter** — instant toggle, zero server round-trips (#401)
-
-      - **Server-side collision analysis** — heavy computation moved off the browser (#415)
-
-      - **In-place ADVERT upserts** — node updates without full page reload (#461)
-
-      - **Targeted cache invalidation** — analytics refresh only what changed (#379)
-
-      - **Faster /api/packets and /api/channels** — query optimizations for large stores (#328)
-
-
-      ## 🗺️ New Features
-
-
-      - **Show Direct Neighbors** — click any node on the map to filter to its 1-hop neighbors
-      (#480)
-
-      - **Auto cache busters** — `__BUST__` placeholders replaced at startup, no more merge
-      conflicts over timestamps (#481)
-
-      - **Release tag pinning** — `manage.sh update v3.3.0` pins to exact versions (#456)
-
-
-      ## 🔧 Fixes
-
-
-      - **Haversine distances** — hop distances now use proper great-circle math instead of
-      flat-earth approximation (#478)
-
-      - **Observer online status** — packet ingestion updates last_seen, fixing false "offline"
-      flags (#479)
-
-      - **Hash collision region filter** — analytics respects region selection (#477)
-
-      - **Channel hash display** — shows hex (0x1A) instead of confusing decimal (#471)
-
-      - **VCR timezone** — timeline and clock respect UTC/local toggle (#459)
-
-      - **Graceful shutdown** — WAL checkpoint on container stop (#453)
-
-      - **PerfStats data race** — mutex synchronization eliminates concurrent access bugs (#469)
-
-      - **Multiple null-guard fixes** — no more crashes on navigate-away (#454, #462)
-
-      - **Score/direction extraction** — MQTT fields properly parsed with unit stripping (#371)
-
-      - **Config reset** — no more SITE_CONFIG contamination after reset (#460)
-
-      - **Staging config** — always refreshes from prod (#467)
-
-
-      ## 📊 By the Numbers
-
-
-      - 28 merged PRs
-
-      - 8 performance improvements
-
-      - 13 bug fixes
-
-      - 3 new features
-
-      - 2 CI/docs improvements
-
-      - ~1,400 lines added across 23 files
-  - version: v3.2.0
-    name: CoreScope v3.2.0 — Stability & Data Integrity
-    datetime: '2026-04-01T06:40:19Z'
-    url: https://github.com/Kpa-clawbot/CoreScope/releases/tag/v3.2.0
-    prerelease: false
-    notes: >-
-      A stability and data integrity release — fixing critical crashes, broken observer data, and
-      WebSocket storms, while adding transport code visibility, geo-filtering, and a fully
-      responsive navigation bar.
-
-
-      **15 commits · 35 files · +1,659 / -229 · 3 contributors · 9 issues closed**
-
-
-      ---
-
-
-      ## 🐛 Critical Fixes
-
-
-      **Packets page crash on mobile** (#326) — `Number(null)` silently set the time window to "All
-      time", loading 50K+ packets and crashing iOS Safari/Edge. Fixed with proper guard, 1K packet
-      cap on mobile, and restricted time window options.
-
-
-      **Observer metadata broken since Go migration** (#320, #321) — Battery, uptime, noise floor
-      read at wrong nesting level; SNR/RSSI case-sensitive with no fallback. All fields now work
-      with 10 regression tests.
-
-
-      **Hash stats frozen on historical data** (#303) — Reconfigured repeaters now show updated hash
-      size immediately instead of requiring dozens of adverts to shift the statistical mode.
-
-
-      **WebSocket replaying entire database** (#349) — Corrupted DB caused the poller to start from
-      ID 0, broadcasting 76K packets at ~2,000/sec. Poller now cross-checks against the in-memory
-      store.
-
-
-      ## ✨ Features
-
-
-      **Transport code badge** (#241) — "T" badge on packets using `T_FLOOD` / `T_DIRECT` routing —
-      instant visibility into transport adoption across the mesh.
-
-
-      **Geo-filter enforcement** (#215) — Server-side polygon boundary filtering, automatic DB
-      pruning for out-of-bounds nodes, and a visual geofilter-builder tool.
-
-
-      **Responsive navigation** (#322) — Hamburger menu at ≤1023px with drawer scroll, outside-click
-      close, Escape key, and `aria-expanded`. Priority+ pattern on tablets (768–1023px): 5 primary
-      tabs inline + "More ▾" dropdown for the rest.
-
-
-      ## 🎨 Improvements
-
-
-      **Side pane contrast** (#334) — Card-style backgrounds on node detail side pane sections,
-      fixing poor dark mode contrast.
-
-
-      **WebSocket time filtering** — WS packets now respect the selected time window instead of
-      showing data from days ago.
-
-
-      **CI runner cleanup** (#333) — Automatic Docker image pruning after deploy. Runner was 100%
-      full (18.8GB of dangling images).
-
-
-      ---
-
-
-      **Full changelog:**
-      [`v3.1.0...v3.2.0`](https://github.com/Kpa-clawbot/CoreScope/compare/v3.1.0...v3.2.0)
