@@ -1,7 +1,70 @@
 source: github
 repo: andymux/meshos-releases
-updatedAt: '2026-10-03T19:05:42.618Z'
+updatedAt: '2026-10-04T11:57:05.104Z'
 releases:
+  - version: v1.0.24
+    name: MeshOS v1.0.24
+    datetime: '2026-10-04T11:39:56Z'
+    url: https://github.com/andymux/meshos-releases/releases/tag/v1.0.24
+    prerelease: false
+    notes: >-
+      # MeshOS app 1.0.24
+
+
+      ## AirLink and MeshOS repeaters
+
+      - MeshOS repeaters (firmware 1.6) can bridge AirLink and LoRa: phones on AirLink reach the
+      LoRa mesh through the repeater, and LoRa messages reach them. The app shows which repeater put
+      a message on LoRa.
+
+      - Message paths name the LoRa repeaters a bridged message came through, the same way the map's
+      AirLink/LoRa switch shows them.
+
+      - Delivery reports come back from phones that received your message over AirLink as well.
+
+      - Your profile picture is sent to AirLink phones that have not had it yet, and the picture
+      menu has "Send my picture over AirLink".
+
+      - Android: steadier AirLink connections; a phone that failed to connect once is tried again.
+
+      - Mac and iPhone: AirLink comes back on after Bluetooth is switched off and on. The Mac app
+      connects to MeshOS repeaters over AirLink.
+
+
+      ## Repeaters
+
+      - Tools > Manage a repeater finds MeshOS repeaters on your network as well as over Bluetooth,
+      and opens their page in the app.
+
+
+      ## Channels and messages
+
+      - An AirLink channel can have its own Internet link.
+
+      - A message that arrives over LoRa after its internet copy is kept with it, so you can see it
+      came both ways.
+
+      - Your own LoRa message coming back over AirLink no longer shows as a new message.
+
+      - An internet room is no longer listed a second time beside the channel that already carries
+      its internet link.
+
+      - Blocked users: # in a pattern matches one digit, so ######## hides names made of eight
+      digits. The participants list offers "Block all names like this".
+
+
+      ## Downloads
+
+      - Android: MeshOS-v1.0.24.apk
+
+      - macOS: MeshOS-v1.0.24.dmg
+
+
+      SHA-256:
+
+      - MeshOS-v1.0.24.apk: e38731010513ec4617b656aeb3474bdae8b6b09daea9c836ebe9bc810b9f669e
+
+      - MeshOS-v1.0.24.dmg: 189e85fb75da5d92ee625e3c3c504c33aa15d99834602b2a5f88d147cb19726b
   - version: v1.0.23
     name: MeshOS v1.0.23
     datetime: '2026-09-26T17:38:35Z'
@@ -644,16 +707,3 @@ releases:
       - TDeck: 2331383412fe6558564970449ff60fdea3c2e88632bff1e13a6b013f9223e361
 
       - M9: e257e7569be1f74c9594c23b0b901c6246ed34c73a9bdda197beef03b0bfcbbb
-  - version: v1.0.14
-    name: MeshOS v1.0.14
-    datetime: '2026-08-12T15:34:59Z'
-    url: https://github.com/andymux/meshos-releases/releases/tag/v1.0.14
-    prerelease: false
-    notes: >-
-      Picture messaging is here: send end to end encrypted photos on internet channels and the
-      MeshOS room. Photos appear right in the chat, with pinch to zoom, save to gallery and share.
-      T-Deck and M9 users can view them too (v1.6.4 or later). Also adds QR code sharing for
-      internet channels and assorted fixes.
-
-
-      APK SHA-256: `3832817fb0ea2a81d67f043cd36ef0d89f7518c4edb2cd5aca46c4e9620f636e`
