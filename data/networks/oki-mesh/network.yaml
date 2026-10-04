@@ -1,0 +1,35 @@
+name: OKI Mesh
+short_name: OKI Mesh
+description: >-
+    The OKI Mesh Alliance is a volunteer-built, community-owned 
+    communications network serving southwest Ohio, Indiana,
+     and northern Kentucky. Using low-power LoRa radio and the open 
+     MeshCore protocol, we run a resilient, decentralized mesh that
+      operates independently of internet, cellular infrastructure, 
+      and centralized control.
+scope: regional
+status: active
+part_of:
+    - ohio-kentucky-indiana-mesh
+    - usa-canada-recommended
+visibility: public
+area: area.geojson
+
+coverage:
+    countries:
+        - US
+
+radio:
+    frequency: "915"
+    frequency_mhz: 910.525
+    bandwidth_khz: 62.5
+    spreading_factor: 7
+    coding_rate: 4/5
+    path_hash_mode: 2-Byte
+    public_channel: Public
+
+community:
+    website: https://okimesh.org/
+
+resources:
+    getting_started: https://okimesh.org/
