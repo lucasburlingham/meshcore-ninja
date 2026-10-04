@@ -1,7 +1,13 @@
 source: github
 repo: meshcore-dev/meshcore-cli
-updatedAt: '2026-09-16T22:43:46.449Z'
+updatedAt: '2026-10-04T04:53:39.319Z'
 releases:
+  - version: v1.6.5
+    name: v1.6.5
+    datetime: '2026-10-04T00:55:24Z'
+    url: https://github.com/meshcore-dev/meshcore-cli/releases/tag/v1.6.5
+    prerelease: false
+    notes: "Support for chan_data\r\n* `chan_data` command to send data through a channel\r\n* printing of chan data as they come (can be toggled through `set display_chan_data on/off`\r\n* new handler type (you can do `handler_attach chan_data <cmd>`)\r\n\r\n**Full Changelog**: https://github.com/meshcore-dev/meshcore-cli/compare/v1.6.4...v1.6.5"
   - version: v1.6.4
     name: v1.6.4
     datetime: '2026-09-16T20:46:42Z'
