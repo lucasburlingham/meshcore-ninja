@@ -30,6 +30,15 @@ radio:
 
 community:
     website: https://okimesh.org/
+    discord: https://discord.okimesh.org/
+
+maps:
+  - name: "OKI Coverage Map"
+    url: https://swoh.meshmapper.net
+
+analyzers:
+  - name: "OKI Corescope"
+    url: https://map.okimesh.org
 
 resources:
     getting_started: https://okimesh.org/
