@@ -1,12 +1,12 @@
 name: OKI Mesh
 short_name: OKI Mesh
 description: >-
-    The OKI Mesh Alliance is a volunteer-built, community-owned 
+    The OKI Mesh Alliance is a volunteer-built, community-owned
     communications network serving southwest Ohio, Indiana,
-     and northern Kentucky. Using low-power LoRa radio and the open 
-     MeshCore protocol, we run a resilient, decentralized mesh that
-      operates independently of internet, cellular infrastructure, 
-      and centralized control.
+    and northern Kentucky. Using low-power LoRa radio and the open
+    MeshCore protocol, we run a resilient, decentralized mesh that
+    operates independently of internet, cellular infrastructure,
+    and centralized control.
 scope: regional
 status: active
 part_of:
